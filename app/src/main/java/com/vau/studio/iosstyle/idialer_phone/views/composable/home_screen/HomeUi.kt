@@ -21,12 +21,17 @@ import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.MainViewModel
 @Composable
 fun HomeScreen(mainViewModel: MainViewModel = viewModel()) {
     val navController = rememberNavController()
-    val currentScreen: String by mainViewModel.navScreen.observeAsState(DEFAULT_SCREEN_NAME)
+    val currentScreen: String by mainViewModel.navScreen.observeAsState(DEFAULT_SCREEN_NAME).also {
+        if (navController.currentDestination != null &&
+            navController.currentDestination!!.route != it.value) {
+            navController.navigate(it.value)
+        }
+    }
 
     Scaffold(
         bottomBar = {
             AppBottomBar(navController = navController, onTap = { route ->
-                navController.navigate(route = route)
+                mainViewModel.navigateTo(route)
             })
         }
     ) { padding ->
