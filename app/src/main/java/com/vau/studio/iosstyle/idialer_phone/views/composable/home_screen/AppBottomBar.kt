@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
+import java.lang.AssertionError
 
 @Composable
 fun AppBottomBar(navController: NavController, onTap: (route: String) -> Unit) {
@@ -74,6 +75,18 @@ enum class HomeScreen(
                 KeypadScreen,
                 VoiceMailScreen
             )
+        }
+
+        @JvmStatic
+        fun decodedScreenByString(name: String) : HomeScreen {
+            when (name) {
+                "favorite" -> return FavoriteScreen
+                "recent" -> return RecentScreen
+                "contact" -> return ContactScreen
+                "keypad" -> return KeypadScreen
+                "voice_mail" -> return VoiceMailScreen
+            }
+            throw AssertionError("Please pass a proper screen name")
         }
     }
 }
