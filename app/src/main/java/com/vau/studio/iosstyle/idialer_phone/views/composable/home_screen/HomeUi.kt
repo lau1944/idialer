@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
@@ -21,11 +22,10 @@ import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.MainViewModel
 @Composable
 fun HomeScreen(mainViewModel: MainViewModel = viewModel()) {
     val navController = rememberNavController()
-    val currentScreen: String by mainViewModel.navScreen.observeAsState(DEFAULT_SCREEN_NAME).also {
-        if (navController.currentDestination != null &&
-            navController.currentDestination!!.route != it.value) {
-            navController.navigate(it.value)
-        }
+    val currentScreen: String by mainViewModel.navScreen.observeAsState(DEFAULT_SCREEN_NAME)
+
+    LaunchedEffect(currentScreen) {
+        navController.navigate(currentScreen)
     }
 
     Scaffold(
