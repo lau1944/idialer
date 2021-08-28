@@ -4,6 +4,9 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import com.vau.studio.iosstyle.idialer_phone.data.LIGHT_THEME
 import com.vau.studio.iosstyle.idialer_phone.views.composable.AppTheme
 import com.vau.studio.iosstyle.idialer_phone.views.composable.home_screen.HomeScreen
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.MainViewModel
@@ -17,7 +20,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            AppTheme(isDarkTheme = false) {
+            val theme : Int by mainViewModel.appTheme.observeAsState(initial = LIGHT_THEME)
+
+            AppTheme(theme = theme) {
                 HomeScreen(mainViewModel = mainViewModel)
             }
         }

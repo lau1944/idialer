@@ -4,15 +4,34 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.vau.studio.iosstyle.idialer_phone.data.DARK_THEME
 
 @Composable
 fun AppTheme(
-    isDarkTheme: Boolean,
+    theme: Int,
     content: @Composable () -> Unit
 ) {
+    val systemUiController = rememberSystemUiController()
+    val useDarkIcons = MaterialTheme.colors.isLight
+
+    SideEffect {
+        systemUiController.apply {
+            setSystemBarsColor(
+                color = Color.Transparent,
+                darkIcons = useDarkIcons
+            )
+            setStatusBarColor(
+                color = Color.Transparent,
+                darkIcons = useDarkIcons
+            )
+        }
+    }
+
     return MaterialTheme(
-        colors = if (isDarkTheme) DarkColor else LightColor
+        colors = if (theme == DARK_THEME) DarkColor else LightColor
     ) {
         content()
     }
