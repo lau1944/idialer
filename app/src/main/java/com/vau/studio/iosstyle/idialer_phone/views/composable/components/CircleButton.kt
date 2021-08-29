@@ -11,10 +11,33 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vau.studio.iosstyle.idialer_phone.core.ColorUtils
 import com.vau.studio.iosstyle.idialer_phone.data.models.KeypadNumber
+
+@Composable
+fun CircleButton(
+    color: Color?,
+    padding: Dp = 6.dp,
+    content: @Composable () -> Unit,
+    onTap: () -> Unit
+) {
+    Button(
+        onClick = onTap,
+        elevation = noElevation(),
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = color ?: ColorUtils.parseColor("#eeeeee")
+        ),
+        shape = CircleShape,
+        modifier = Modifier
+            .size(keyButtonSize().dp)
+            .padding(padding),
+    ) {
+        content()
+    }
+}
 
 @Composable
 fun NumberCircleButton(keypadNumber: KeypadNumber, onTap: (String) -> Unit) {
@@ -47,6 +70,7 @@ fun NumberCircleButton(keypadNumber: KeypadNumber, onTap: (String) -> Unit) {
                 for (text in keypadNumber.optionalString!!) {
                     Text(
                         text,
+                        modifier = Modifier.padding(horizontal = 2.dp),
                         style = TextStyle(
                             color = Color.Black,
                             fontSize = 14.sp
