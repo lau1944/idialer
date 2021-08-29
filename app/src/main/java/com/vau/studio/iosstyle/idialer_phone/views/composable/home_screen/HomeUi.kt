@@ -17,6 +17,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.vau.studio.iosstyle.idialer_phone.data.DEFAULT_SCREEN_NAME
+import com.vau.studio.iosstyle.idialer_phone.views.composable.keypad_screen.DialerScreen
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.MainViewModel
 
 @Composable
@@ -49,7 +50,7 @@ fun ScreenContent(navController: NavHostController, padding: PaddingValues, star
         composable(HomeScreen.FavoriteScreen.route) { Text("hello") }
         composable(HomeScreen.RecentScreen.route) { Text("hello") }
         composable(HomeScreen.ContactScreen.route) { Text("hello") }
-        composable(HomeScreen.KeypadScreen.route) { Text("hello") }
+        composable(HomeScreen.KeypadScreen.route) { DialerScreen(onTap = {}) }
         composable(HomeScreen.VoiceMailScreen.route) { Text("hello") }
     }
 }
