@@ -12,7 +12,7 @@ class DialerViewModel : ViewModel() {
     fun appendNumber(number: String) {
         val numberList = _inputNumber.value!!
         if (numberList is ArrayList) {
-            _inputNumber.value = listOf(number) + numberList
+            _inputNumber.value = numberList + listOf(number)
         } else {
             throw IllegalArgumentException("Input number list should be array list type")
         }
