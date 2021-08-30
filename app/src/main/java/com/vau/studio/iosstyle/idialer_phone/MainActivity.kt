@@ -6,9 +6,11 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vau.studio.iosstyle.idialer_phone.data.LIGHT_THEME
 import com.vau.studio.iosstyle.idialer_phone.views.composable.AppTheme
 import com.vau.studio.iosstyle.idialer_phone.views.composable.home_screen.HomeScreen
+import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.DialerViewModel
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
 

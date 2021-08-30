@@ -50,7 +50,7 @@ fun ScreenContent(navController: NavHostController, padding: PaddingValues, star
         composable(HomeScreen.FavoriteScreen.route) { Text("hello") }
         composable(HomeScreen.RecentScreen.route) { Text("hello") }
         composable(HomeScreen.ContactScreen.route) { Text("hello") }
-        composable(HomeScreen.KeypadScreen.route) { DialerScreen(onTap = {}) }
+        composable(HomeScreen.KeypadScreen.route) { DialerScreen() }
         composable(HomeScreen.VoiceMailScreen.route) { Text("hello") }
     }
 }
