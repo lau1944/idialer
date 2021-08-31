@@ -26,4 +26,8 @@ class DialerViewModel : ViewModel() {
             throw IllegalArgumentException("Input number list should be array list type")
         }
     }
+
+    fun clearAllNumber() {
+        _inputNumber.value = arrayListOf()
+    }
 }

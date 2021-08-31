@@ -28,9 +28,15 @@ fun DialerScreen(dialerViewModel: DialerViewModel = viewModel()) {
         verticalArrangement = Arrangement.SpaceBetween
     ) {
         DialerNumberScreen(numberList.value)
-        KeypadLayout(collection = collection, onTap = { number ->
-            dialerViewModel.appendNumber(number = number)
-        })
+        KeypadLayout(
+            collection = collection,
+            hasNumber = !numberList.value.isNullOrEmpty(),
+            onTap = { number ->
+                dialerViewModel.appendNumber(number = number)
+            },
+            onClear = {
+                dialerViewModel.clearAllNumber()
+            })
     }
 }
 
