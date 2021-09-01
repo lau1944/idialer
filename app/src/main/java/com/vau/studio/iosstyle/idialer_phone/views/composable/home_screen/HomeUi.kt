@@ -16,14 +16,27 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.MultiplePermissionsState
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.vau.studio.iosstyle.idialer_phone.data.CONTACT_READ_PERMISSION
+import com.vau.studio.iosstyle.idialer_phone.data.CONTACT_WRITE_PERMISSION
 import com.vau.studio.iosstyle.idialer_phone.data.DEFAULT_SCREEN_NAME
+import com.vau.studio.iosstyle.idialer_phone.views.composable.contact_screen.ContactUi
 import com.vau.studio.iosstyle.idialer_phone.views.composable.keypad_screen.DialerScreen
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.MainViewModel
 
+@ExperimentalPermissionsApi
 @Composable
 fun HomeScreen(mainViewModel: MainViewModel = viewModel()) {
     val navController = rememberNavController()
     val currentScreen: String by mainViewModel.navScreen.observeAsState(DEFAULT_SCREEN_NAME)
+    val multiPermissionState = rememberMultiplePermissionsState(
+        permissions = listOf(
+            CONTACT_READ_PERMISSION,
+            CONTACT_WRITE_PERMISSION
+        )
+    )
 
     LaunchedEffect(currentScreen) {
         navController.navigate(currentScreen)
@@ -36,12 +49,23 @@ fun HomeScreen(mainViewModel: MainViewModel = viewModel()) {
             })
         }
     ) { padding ->
-        ScreenContent(navController = navController, padding = padding, startRoute = currentScreen)
+        ScreenContent(
+            navController = navController,
+            multiPermissionState = multiPermissionState,
+            padding = padding,
+            startRoute = currentScreen
+        )
     }
 }
 
+@ExperimentalPermissionsApi
 @Composable
-fun ScreenContent(navController: NavHostController, padding: PaddingValues, startRoute: String) {
+fun ScreenContent(
+    navController: NavHostController,
+    multiPermissionState: MultiplePermissionsState,
+    padding: PaddingValues,
+    startRoute: String
+) {
     NavHost(
         navController = navController,
         startDestination = startRoute,
@@ -49,7 +73,7 @@ fun ScreenContent(navController: NavHostController, padding: PaddingValues, star
     ) {
         composable(HomeScreen.FavoriteScreen.route) { Text("hello") }
         composable(HomeScreen.RecentScreen.route) { Text("hello") }
-        composable(HomeScreen.ContactScreen.route) { Text("hello") }
+        composable(HomeScreen.ContactScreen.route) { ContactUi(multiplePermissionsState = multiPermissionState) }
         composable(HomeScreen.KeypadScreen.route) { DialerScreen() }
         composable(HomeScreen.VoiceMailScreen.route) { Text("hello") }
     }
