@@ -20,8 +20,8 @@ import com.vau.studio.iosstyle.idialer_phone.views.composable.iosGray
 
 @Composable
 fun SearchBar(
-    text: String? = "",
-    hintText: String? = "",
+    text: String? = null,
+    hintText: String? = null,
     onChanged: (String?) -> Unit,
     onSearch: (String?) -> Unit
 ) {
@@ -40,7 +40,7 @@ fun SearchBar(
             unfocusedIndicatorColor = Color.Transparent,
             backgroundColor = iosGray
         ),
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(15.dp),
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
         keyboardActions = KeyboardActions(
             onSearch = {

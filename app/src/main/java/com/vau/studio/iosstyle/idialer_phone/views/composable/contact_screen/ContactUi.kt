@@ -42,7 +42,7 @@ fun ContactUi(
                     Box(
                         modifier = Modifier.padding(horizontal = 5.dp),
                     ) {
-                        SearchBar(onChanged = {}, onSearch = {})
+
                     }
                 }
 
