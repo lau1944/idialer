@@ -10,8 +10,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -24,11 +22,12 @@ import com.vau.studio.iosstyle.idialer_phone.data.CONTACT_WRITE_PERMISSION
 import com.vau.studio.iosstyle.idialer_phone.data.DEFAULT_SCREEN_NAME
 import com.vau.studio.iosstyle.idialer_phone.views.composable.contact_screen.ContactUi
 import com.vau.studio.iosstyle.idialer_phone.views.composable.keypad_screen.DialerScreen
+import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.ContactViewModel
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.MainViewModel
 
 @ExperimentalPermissionsApi
 @Composable
-fun HomeScreen(mainViewModel: MainViewModel = viewModel()) {
+fun HomeScreen(mainViewModel: MainViewModel = viewModel(), contactViewModel: ContactViewModel) {
     val navController = rememberNavController()
     val currentScreen: String by mainViewModel.navScreen.observeAsState(DEFAULT_SCREEN_NAME)
     val multiPermissionState = rememberMultiplePermissionsState(
@@ -53,7 +52,8 @@ fun HomeScreen(mainViewModel: MainViewModel = viewModel()) {
             navController = navController,
             multiPermissionState = multiPermissionState,
             padding = padding,
-            startRoute = currentScreen
+            startRoute = currentScreen,
+            contactViewModel = contactViewModel
         )
     }
 }
@@ -64,7 +64,8 @@ fun ScreenContent(
     navController: NavHostController,
     multiPermissionState: MultiplePermissionsState,
     padding: PaddingValues,
-    startRoute: String
+    startRoute: String,
+    contactViewModel: ContactViewModel
 ) {
     NavHost(
         navController = navController,
@@ -73,7 +74,12 @@ fun ScreenContent(
     ) {
         composable(HomeScreen.FavoriteScreen.route) { Text("hello") }
         composable(HomeScreen.RecentScreen.route) { Text("hello") }
-        composable(HomeScreen.ContactScreen.route) { ContactUi(multiplePermissionsState = multiPermissionState) }
+        composable(HomeScreen.ContactScreen.route) {
+            ContactUi(
+                multiplePermissionsState = multiPermissionState,
+                contactViewModel = contactViewModel
+            )
+        }
         composable(HomeScreen.KeypadScreen.route) { DialerScreen() }
         composable(HomeScreen.VoiceMailScreen.route) { Text("hello") }
     }

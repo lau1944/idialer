@@ -3,6 +3,7 @@ package com.vau.studio.iosstyle.idialer_phone.views.composable.components
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -11,7 +12,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
@@ -25,9 +30,14 @@ fun SearchBar(
     onChanged: (String?) -> Unit,
     onSearch: (String?) -> Unit
 ) {
+
+    val focusRequester = remember { FocusRequester() }
+    val focusManager = LocalFocusManager.current
+
     val textState = remember {
         mutableStateOf(TextFieldValue(text = text ?: ""))
     }
+
     TextField(
         value = textState.value,
         onValueChange = { value ->
@@ -55,11 +65,15 @@ fun SearchBar(
             SearchIcon()
         },
         trailingIcon = {
-            CancelIcon {
-                textState.value = TextFieldValue()
-            }
+            if (textState.value.text.isNotEmpty())
+                CancelIcon {
+                    focusManager.clearFocus()
+                    textState.value = TextFieldValue()
+                }
         },
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .focusRequester(focusRequester)
     )
 }
 
