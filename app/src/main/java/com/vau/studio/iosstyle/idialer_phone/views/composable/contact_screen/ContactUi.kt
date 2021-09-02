@@ -1,8 +1,12 @@
 package com.vau.studio.iosstyle.idialer_phone.views.composable.contact_screen
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.Button
 import androidx.compose.material.Divider
 import androidx.compose.material.Scaffold
@@ -29,9 +33,11 @@ fun ContactUi(
     multiplePermissionsState: MultiplePermissionsState,
     contactViewModel: ContactViewModel
 ) {
+    val scrollState = rememberLazyListState()
+
     Scaffold(
         topBar = {
-            ContactAppBar()
+            ContactAppBar(scrollState)
         },
     ) {
         Box(
@@ -53,7 +59,7 @@ fun ContactUi(
                         if (contacts.isNullOrEmpty()) {
                             Text("No Contact Info")
                         } else {
-                            ContactList(contactNames = contacts!!)
+                            ContactList(contactNames = contacts!!, scrollState = scrollState)
                         }
                     }
                 }
@@ -85,7 +91,7 @@ fun ContactUi(
 }
 
 @Composable
-private fun ContactList(contactNames: List<String>) {
+private fun ContactList(contactNames: List<String>, scrollState: LazyListState) {
     LazyColumn(content = {
         items(contactNames) { name ->
             Box(
@@ -106,7 +112,8 @@ private fun ContactList(contactNames: List<String>) {
             }
         }
     },
-    verticalArrangement = Arrangement.Top)
+    verticalArrangement = Arrangement.Top,
+    state = scrollState)
 }
 
 @Composable
