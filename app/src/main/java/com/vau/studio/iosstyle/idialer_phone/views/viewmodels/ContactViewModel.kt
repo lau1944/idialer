@@ -21,13 +21,17 @@ class ContactViewModel @Inject constructor(
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
+    private val _queriedContacts = MutableLiveData<List<String>>(mutableListOf())
     private val _contactList = MutableLiveData<List<String>>(mutableListOf())
-    val contactList: LiveData<List<String>> get() = _contactList
+    val contactList: LiveData<List<String>> get() = _queriedContacts
 
     companion object {
         const val TAG: String = "ContactViewModel"
     }
 
+    /**
+     * Get all contacts
+     */
     @SuppressLint("Recycle")
     fun getContactNames(lookUp: String? = null) = viewModelScope.launch {
         val cursor = context.contentResolver.query(
@@ -50,8 +54,25 @@ class ContactViewModel @Inject constructor(
                     contacts.add(cursor.getStringOrNull(nameIndex) ?: "")
                 }
             }
+            // submit names for all contacts info
             _contactList.value = contacts
+            // submit names for query purposes
+            _queriedContacts.value = contacts
+            cursor.close()
         }
     }
 
+    /**
+     * Query contact by name on [_queriedContacts]
+     */
+    fun queryNumberByName(query: String?) {
+        if (query.isNullOrEmpty()) _queriedContacts.value = _contactList.value
+
+        val contacts = _contactList.value
+        contacts.let {
+            _queriedContacts.value = it?.filter { name ->
+                name.startsWith(query!!)
+            }
+        }
+    }
 }

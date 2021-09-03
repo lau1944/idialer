@@ -37,11 +37,11 @@ fun ContactUi(
 
     Scaffold(
         topBar = {
-            ContactAppBar(scrollState)
+            ContactAppBar(scrollState, contactViewModel)
         },
     ) {
         Box(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
         ) {
             val context = LocalContext.current
             when {
@@ -52,12 +52,17 @@ fun ContactUi(
                     ) {
                         val contacts by contactViewModel.contactList.observeAsState()
 
-                        SideEffect {
+                        LaunchedEffect(true, block = {
                             contactViewModel.getContactNames()
-                        }
+                        })
 
                         if (contacts.isNullOrEmpty()) {
-                            Text("No Contact Info")
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                Text("No Contact Info", style = TextStyle(color = Color.Black))
+                            }
                         } else {
                             ContactList(contactNames = contacts!!, scrollState = scrollState)
                         }

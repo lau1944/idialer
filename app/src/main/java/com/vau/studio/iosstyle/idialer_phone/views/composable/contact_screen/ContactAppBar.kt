@@ -1,5 +1,6 @@
 package com.vau.studio.iosstyle.idialer_phone.views.composable.contact_screen
 
+import android.provider.ContactsContract
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyListState
@@ -19,10 +20,12 @@ import com.vau.studio.iosstyle.idialer_phone.views.composable.components.AssetIm
 import com.vau.studio.iosstyle.idialer_phone.views.composable.components.SearchBar
 import com.vau.studio.iosstyle.idialer_phone.views.composable.iosBlue
 import com.vau.studio.iosstyle.idialer_phone.views.composable.iosWhite
+import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.ContactViewModel
 
 @Composable
 fun ContactAppBar(
-    scrollState: LazyListState
+    scrollState: LazyListState,
+    contactViewModel: ContactViewModel
 ) {
     Column(
         horizontalAlignment = Alignment.End
@@ -55,8 +58,16 @@ fun ContactAppBar(
             Box(
                 modifier = Modifier.padding(horizontal = 15.dp, vertical = 12.dp)
             ) {
-                SearchBar(onChanged = {}, onSearch = {})
+                SearchBar(onChanged = {
+                    searchContactByName(it, contactViewModel = contactViewModel)
+                }, onSearch = {
+                    searchContactByName(it, contactViewModel = contactViewModel)
+                })
             }
         }
     }
+}
+
+private fun searchContactByName(name: String?, contactViewModel: ContactViewModel) {
+    contactViewModel.queryNumberByName(name)
 }
