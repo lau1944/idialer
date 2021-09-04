@@ -1,12 +1,10 @@
 package com.vau.studio.iosstyle.idialer_phone.views.composable.contact_screen
 
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.Button
 import androidx.compose.material.Divider
 import androidx.compose.material.Scaffold
@@ -23,8 +21,9 @@ import androidx.compose.ui.unit.sp
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.vau.studio.iosstyle.idialer_phone.core.OpenUtil
-import com.vau.studio.iosstyle.idialer_phone.data.models.Contact
+import com.vau.studio.iosstyle.idialer_phone.data.models.UiState
 import com.vau.studio.iosstyle.idialer_phone.views.composable.appColor
+import com.vau.studio.iosstyle.idialer_phone.views.composable.components.UiProgressLayout
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.ContactViewModel
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -50,21 +49,24 @@ fun ContactUi(
                     Box(
                         modifier = Modifier.padding(horizontal = 5.dp),
                     ) {
-                        val contacts by contactViewModel.contactList.observeAsState()
+                        val contactState by contactViewModel.contactListState.observeAsState()
 
                         LaunchedEffect(true, block = {
                             contactViewModel.getContactNames()
                         })
 
-                        if (contacts.isNullOrEmpty()) {
-                            Box(
-                                contentAlignment = Alignment.Center,
-                                modifier = Modifier.fillMaxSize()
-                            ) {
-                                Text("No Contact Info", style = TextStyle(color = Color.Black))
+                        UiProgressLayout(state = contactState) {
+                            val contacts = (contactState as UiState.Success).data as List<String>
+                            if (contacts.isNullOrEmpty()) {
+                                Box(
+                                    contentAlignment = Alignment.Center,
+                                    modifier = Modifier.fillMaxSize()
+                                ) {
+                                    Text("No Contact Info", style = TextStyle(color = Color.Black))
+                                }
+                            } else {
+                                ContactList(contactNames = contacts, scrollState = scrollState)
                             }
-                        } else {
-                            ContactList(contactNames = contacts!!, scrollState = scrollState)
                         }
                     }
                 }

@@ -4,7 +4,12 @@ import java.lang.Exception
 import java.util.*
 
 sealed class UiState<out T: Any> {
-    object InProgress : UiState<Any>()
-    data class Failed(val exception: Exception): UiState<Any>()
-    data class Success<out T: Any>(val data: T): UiState<T>()
+    object InProgress : UiState<Nothing>()
+    data class Failed(val exception: Exception): UiState<Nothing>()
+    data class Success<out T: Any>(val data: T?): UiState<T>() {
+        @JvmName("copy_success")
+        fun <T: Any> copy(data: T) : Success<T> {
+            return Success(data)
+        }
+    }
 }
