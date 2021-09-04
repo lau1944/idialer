@@ -22,6 +22,7 @@ import com.vau.studio.iosstyle.idialer_phone.data.CONTACT_WRITE_PERMISSION
 import com.vau.studio.iosstyle.idialer_phone.data.DEFAULT_SCREEN_NAME
 import com.vau.studio.iosstyle.idialer_phone.views.composable.contact_screen.ContactUi
 import com.vau.studio.iosstyle.idialer_phone.views.composable.keypad_screen.DialerScreen
+import com.vau.studio.iosstyle.idialer_phone.views.composable.recent_screen.RecentUi
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.ContactViewModel
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.MainViewModel
 
@@ -73,7 +74,7 @@ fun ScreenContent(
         Modifier.padding(padding)
     ) {
         composable(HomeScreen.FavoriteScreen.route) { Text("hello") }
-        composable(HomeScreen.RecentScreen.route) { Text("hello") }
+        composable(HomeScreen.RecentScreen.route) { RecentUi() }
         composable(HomeScreen.ContactScreen.route) {
             ContactUi(
                 multiplePermissionsState = multiPermissionState,
