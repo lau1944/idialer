@@ -38,7 +38,6 @@ fun UiProgressLayout(
 @Composable
 private fun ProgressBox(layout: @Composable () -> Unit) {
     Box(
-        contentAlignment = Alignment.Center,
         modifier = Modifier.fillMaxSize()
     ) {
         layout()

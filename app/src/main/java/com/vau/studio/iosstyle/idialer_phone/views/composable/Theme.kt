@@ -17,22 +17,23 @@ fun AppTheme(
 ) {
     val systemUiController = rememberSystemUiController()
     val useDarkIcons = MaterialTheme.colors.isLight
+    val colors = if (theme == DARK_THEME) DarkColor else LightColor
 
     SideEffect {
         systemUiController.apply {
             setSystemBarsColor(
-                color = Color.Transparent,
+                color = colors.background,
                 darkIcons = useDarkIcons
             )
             setStatusBarColor(
-                color = Color.Transparent,
+                color = colors.background,
                 darkIcons = useDarkIcons
             )
         }
     }
 
     return MaterialTheme(
-        colors = if (theme == DARK_THEME) DarkColor else LightColor
+        colors = colors
     ) {
         content()
     }

@@ -13,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
@@ -74,15 +75,20 @@ fun ContactUi(
                 // Permission did not request
                 multiplePermissionsState.shouldShowRationale ||
                         !multiplePermissionsState.allPermissionsGranted -> {
-                    Button(onClick = {
-                        multiplePermissionsState.launchMultiplePermissionRequest()
-                    }) {
-                        Text(
-                            "Grant Contact Permission", style = TextStyle(
-                                appColor().background,
-                                fontSize = 16.sp,
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Button(onClick = {
+                            multiplePermissionsState.launchMultiplePermissionRequest()
+                        }) {
+                            Text(
+                                "Grant Contact Permission", style = TextStyle(
+                                    appColor().background,
+                                    fontSize = 16.sp,
+                                )
                             )
-                        )
+                        }
                     }
                 }
 
@@ -99,33 +105,38 @@ fun ContactUi(
 
 @Composable
 private fun ContactList(contactNames: List<String>, scrollState: LazyListState) {
-    LazyColumn(content = {
-        items(contactNames) { name ->
-            Box(
-                modifier = Modifier
-                    .padding(vertical = 6.dp, horizontal = 10.dp)
-                    .fillMaxWidth()
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.Start
+    LazyColumn(
+        content = {
+            items(contactNames) { name ->
+                Box(
+                    modifier = Modifier
+                        .padding(vertical = 6.dp, horizontal = 10.dp)
+                        .fillMaxWidth()
                 ) {
-                    Text(
-                        name,
-                        style = TextStyle(color = appColor().surface, fontSize = 16.sp),
-                        modifier = Modifier.padding(vertical = 10.dp)
-                    )
-                    Divider(color = Color.LightGray.copy(alpha = 0.5f), thickness = 0.5.dp)
+                    Column(
+                        horizontalAlignment = Alignment.Start
+                    ) {
+                        Text(
+                            name,
+                            style = TextStyle(color = appColor().surface, fontSize = 16.sp),
+                            modifier = Modifier.padding(vertical = 10.dp)
+                        )
+                        Divider(color = Color.LightGray.copy(alpha = 0.5f), thickness = 0.5.dp)
+                    }
                 }
             }
-        }
-    },
-    verticalArrangement = Arrangement.Top,
-    state = scrollState)
+        },
+        verticalArrangement = Arrangement.Top,
+        state = scrollState,
+    )
 }
 
 @Composable
 private fun DeniedLayout(navigateToSetting: () -> Unit) {
-    Column {
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Text("Permission denied, open setting to grant permission")
         Button(onClick = {
             navigateToSetting()
