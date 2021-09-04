@@ -9,15 +9,20 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vau.studio.iosstyle.idialer_phone.data.models.UiState
+import com.vau.studio.iosstyle.idialer_phone.data.repositories.PhoneRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 @SuppressLint("StaticFieldLeak")
 class ContactViewModel @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val phoneRepository: PhoneRepository
 ) : ViewModel() {
 
     private val _queriedContactState = MutableLiveData<UiState<List<String>>>()
@@ -34,31 +39,15 @@ class ContactViewModel @Inject constructor(
     @SuppressLint("Recycle")
     fun getContactNames(lookUp: String? = null) = viewModelScope.launch {
         _queriedContactState.value = UiState.InProgress
-        val cursor = context.contentResolver.query(
-            ContactsContract.Data.CONTENT_URI,
-            arrayOf(
-                ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
-            ),
-            lookUp,
-            null,
-            ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC"
-        )
-        if (cursor != null) {
-            val contacts = mutableListOf<String>()
-            while (cursor.moveToNext()) {
-                val nameIndex =
-                    cursor.getColumnIndex(
-                        ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
-                    )
-                if (nameIndex > -1) {
-                    contacts.add(cursor.getStringOrNull(nameIndex) ?: "")
-                }
+        phoneRepository.getContactNames(context, lookUp)
+            .flowOn(Dispatchers.Default)
+            .collect { contacts ->
+            if (contacts != null) {
+                _contactList.value = contacts
+                _queriedContactState.value = UiState.Success(contacts)
+            } else {
+                _queriedContactState.value = UiState.Failed()
             }
-            // submit names for all contacts info
-            _contactList.value = contacts
-            // submit names for query purposes
-            _queriedContactState.value = UiState.Success(data = contacts)
-            cursor.close()
         }
     }
 
