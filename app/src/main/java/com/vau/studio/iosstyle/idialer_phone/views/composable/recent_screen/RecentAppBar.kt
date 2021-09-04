@@ -41,9 +41,9 @@ fun RecentAppBar(onSelected: ((Int) -> Unit)? = null, onEdit: (() -> Unit)? = nu
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable {
-                        onEdit()
-                    }
-                        contentAlignment = Alignment . CenterEnd
+                        onEdit?.invoke()
+                    },
+                contentAlignment = Alignment.CenterEnd
             ) {
                 Text("Edit", style = TextStyle(color = iosBlue, fontSize = 16.sp))
             }
