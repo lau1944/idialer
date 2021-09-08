@@ -21,19 +21,28 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.vau.studio.iosstyle.idialer_phone.core.OpenUtil
+import com.vau.studio.iosstyle.idialer_phone.data.CONTACT_READ_PERMISSION
+import com.vau.studio.iosstyle.idialer_phone.data.CONTACT_WRITE_PERMISSION
 import com.vau.studio.iosstyle.idialer_phone.data.models.UiState
 import com.vau.studio.iosstyle.idialer_phone.views.composable.appColor
+import com.vau.studio.iosstyle.idialer_phone.views.composable.components.DeniedLayout
 import com.vau.studio.iosstyle.idialer_phone.views.composable.components.UiProgressLayout
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.ContactViewModel
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun ContactUi(
-    multiplePermissionsState: MultiplePermissionsState,
     contactViewModel: ContactViewModel
 ) {
     val scrollState = rememberLazyListState()
+    val contactPermissionsState = rememberMultiplePermissionsState(
+        permissions = listOf(
+            CONTACT_READ_PERMISSION,
+            CONTACT_WRITE_PERMISSION
+        )
+    )
 
     Scaffold(
         topBar = {
@@ -46,7 +55,7 @@ fun ContactUi(
             val context = LocalContext.current
             when {
                 // All permission granted here
-                multiplePermissionsState.allPermissionsGranted -> {
+                contactPermissionsState.allPermissionsGranted -> {
                     Box(
                         modifier = Modifier.padding(horizontal = 5.dp),
                     ) {
@@ -73,14 +82,14 @@ fun ContactUi(
                 }
 
                 // Permission did not request
-                multiplePermissionsState.shouldShowRationale ||
-                        !multiplePermissionsState.allPermissionsGranted -> {
+                contactPermissionsState.shouldShowRationale ||
+                        !contactPermissionsState.allPermissionsGranted -> {
                     Box(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier.fillMaxSize()
                     ) {
                         Button(onClick = {
-                            multiplePermissionsState.launchMultiplePermissionRequest()
+                            contactPermissionsState.launchMultiplePermissionRequest()
                         }) {
                             Text(
                                 "Grant Contact Permission", style = TextStyle(
@@ -129,24 +138,4 @@ private fun ContactList(contactNames: List<String>, scrollState: LazyListState) 
         verticalArrangement = Arrangement.Top,
         state = scrollState,
     )
-}
-
-@Composable
-private fun DeniedLayout(navigateToSetting: () -> Unit) {
-    Column(
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text("Permission denied, open setting to grant permission")
-        Button(onClick = {
-            navigateToSetting()
-        }) {
-            Text(
-                "Open Setting", style = TextStyle(
-                    appColor().background,
-                    fontSize = 16.sp,
-                )
-            )
-        }
-    }
 }

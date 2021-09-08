@@ -35,11 +35,7 @@ class CallViewModel @Inject constructor(
         const val TAG: String = "CallViewModel"
     }
 
-    init {
-        getCallHistory()
-    }
-
-    private fun getCallHistory() = viewModelScope.launch {
+    fun getCallHistory() = viewModelScope.launch {
         phoneRepository.getCallLog(
             context, arrayOf(
                 CallLog.Calls.CACHED_NAME,

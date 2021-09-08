@@ -10,3 +10,5 @@ const val LIGHT_THEME = 0
 
 const val CONTACT_READ_PERMISSION = android.Manifest.permission.READ_CONTACTS
 const val CONTACT_WRITE_PERMISSION = android.Manifest.permission.WRITE_CONTACTS
+const val CALL_LOG_READ_PERMISSION = android.Manifest.permission.READ_CALL_LOG
+const val CALL_LOG_WRITE_PERMISSION = android.Manifest.permission.WRITE_CALL_LOG

@@ -36,12 +36,6 @@ fun HomeScreen(
 ) {
     val navController = rememberNavController()
     val currentScreen: String by mainViewModel.navScreen.observeAsState(DEFAULT_SCREEN_NAME)
-    val multiPermissionState = rememberMultiplePermissionsState(
-        permissions = listOf(
-            CONTACT_READ_PERMISSION,
-            CONTACT_WRITE_PERMISSION
-        )
-    )
 
     LaunchedEffect(currentScreen) {
         navController.navigate(currentScreen)
@@ -56,7 +50,6 @@ fun HomeScreen(
     ) { padding ->
         ScreenContent(
             navController = navController,
-            multiPermissionState = multiPermissionState,
             padding = padding,
             startRoute = currentScreen,
             contactViewModel = contactViewModel,
@@ -69,7 +62,6 @@ fun HomeScreen(
 @Composable
 fun ScreenContent(
     navController: NavHostController,
-    multiPermissionState: MultiplePermissionsState,
     padding: PaddingValues,
     startRoute: String,
     contactViewModel: ContactViewModel,
@@ -84,7 +76,6 @@ fun ScreenContent(
         composable(HomeScreen.RecentScreen.route) { RecentUi(callViewModel = callViewModel) }
         composable(HomeScreen.ContactScreen.route) {
             ContactUi(
-                multiplePermissionsState = multiPermissionState,
                 contactViewModel = contactViewModel
             )
         }

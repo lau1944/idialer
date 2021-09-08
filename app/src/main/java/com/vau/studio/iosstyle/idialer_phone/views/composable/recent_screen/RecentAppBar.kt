@@ -44,12 +44,11 @@ fun RecentAppBar(onSelected: ((Int) -> Unit)? = null, onEdit: (() -> Unit)? = nu
             ) {
                 Box(
                     modifier = Modifier
-                        .padding(12.dp)
                         .clickable {
                             onEdit?.invoke()
                         },
                     ) {
-                    Text("Edit", style = TextStyle(color = iosBlue, fontSize = 16.sp))
+                    Text("Edit", style = TextStyle(color = iosBlue, fontSize = 15.sp))
                 }
             }
 
