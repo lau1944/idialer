@@ -23,12 +23,17 @@ import com.vau.studio.iosstyle.idialer_phone.data.DEFAULT_SCREEN_NAME
 import com.vau.studio.iosstyle.idialer_phone.views.composable.contact_screen.ContactUi
 import com.vau.studio.iosstyle.idialer_phone.views.composable.keypad_screen.DialerScreen
 import com.vau.studio.iosstyle.idialer_phone.views.composable.recent_screen.RecentUi
+import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.CallViewModel
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.ContactViewModel
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.MainViewModel
 
 @ExperimentalPermissionsApi
 @Composable
-fun HomeScreen(mainViewModel: MainViewModel = viewModel(), contactViewModel: ContactViewModel) {
+fun HomeScreen(
+    mainViewModel: MainViewModel = viewModel(),
+    contactViewModel: ContactViewModel,
+    callViewModel: CallViewModel
+) {
     val navController = rememberNavController()
     val currentScreen: String by mainViewModel.navScreen.observeAsState(DEFAULT_SCREEN_NAME)
     val multiPermissionState = rememberMultiplePermissionsState(
@@ -54,7 +59,8 @@ fun HomeScreen(mainViewModel: MainViewModel = viewModel(), contactViewModel: Con
             multiPermissionState = multiPermissionState,
             padding = padding,
             startRoute = currentScreen,
-            contactViewModel = contactViewModel
+            contactViewModel = contactViewModel,
+            callViewModel = callViewModel
         )
     }
 }
@@ -66,7 +72,8 @@ fun ScreenContent(
     multiPermissionState: MultiplePermissionsState,
     padding: PaddingValues,
     startRoute: String,
-    contactViewModel: ContactViewModel
+    contactViewModel: ContactViewModel,
+    callViewModel: CallViewModel
 ) {
     NavHost(
         navController = navController,
@@ -74,7 +81,7 @@ fun ScreenContent(
         Modifier.padding(padding)
     ) {
         composable(HomeScreen.FavoriteScreen.route) { Text("hello") }
-        composable(HomeScreen.RecentScreen.route) { RecentUi() }
+        composable(HomeScreen.RecentScreen.route) { RecentUi(callViewModel = callViewModel) }
         composable(HomeScreen.ContactScreen.route) {
             ContactUi(
                 multiplePermissionsState = multiPermissionState,

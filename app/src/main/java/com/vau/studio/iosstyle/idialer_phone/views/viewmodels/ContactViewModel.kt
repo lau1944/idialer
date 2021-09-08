@@ -13,6 +13,7 @@ import com.vau.studio.iosstyle.idialer_phone.data.repositories.PhoneRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
@@ -41,6 +42,9 @@ class ContactViewModel @Inject constructor(
         _queriedContactState.value = UiState.InProgress
         phoneRepository.getContactNames(context, lookUp)
             .flowOn(Dispatchers.Default)
+            .catch { e ->
+                _queriedContactState.value = UiState.Failed(e)
+            }
             .collect { contacts ->
             if (contacts != null) {
                 _contactList.value = contacts

@@ -1,12 +1,15 @@
 package com.vau.studio.iosstyle.idialer_phone.data.models
 
-const val INCOMING_CALL : String = "INCOMING"
-const val OUTGOING_CALL : String = "OUTGOING"
+import android.provider.CallLog
+
+const val INCOMING_CALL : Int = CallLog.Calls.INCOMING_TYPE
+const val OUTGOING_CALL : Int = CallLog.Calls.OUTGOING_TYPE
 
 data class CallHistory(
     val name: String? = "",
     val number: String? = "",
     val date: String? = "",
-    val type: String? = INCOMING_CALL,
+    val location: String? = "",
+    val type: Int? = OUTGOING_CALL,
     val duration: String? = ""
 )

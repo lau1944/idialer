@@ -15,6 +15,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
+import java.lang.Exception
 
 /**
  * This repo contains methods to get phone related data asynchronously
@@ -53,6 +54,10 @@ object PhoneRepository {
                 withContext(Dispatchers.Default) {
                     emit(contacts)
                 }
+            } else {
+                withContext(Dispatchers.Default) {
+                    emit(emptyList<String>())
+                }
             }
         }
     }
@@ -64,12 +69,12 @@ object PhoneRepository {
     fun getCallLog(
         @ApplicationContext context: Context,
         projection: Array<String>
-    ): Flow<List<CallHistory>> = flow {
+    ): Flow<List<CallHistory>?> = flow {
         withContext(Dispatchers.IO) {
             val cursor =
                 context.contentResolver.query(
                     CallLog.Calls.CONTENT_URI,
-                    null, null, null, CallLog.Calls.DATE + " DESC"
+                    projection, null, null, CallLog.Calls.DATE + " DESC"
                 )
             if (cursor != null) {
                 val callLogs = mutableListOf<CallHistory>()
@@ -78,13 +83,19 @@ object PhoneRepository {
                 val type = cursor.getColumnIndex(CallLog.Calls.TYPE)
                 val date = cursor.getColumnIndex(CallLog.Calls.DATE)
                 val duration = cursor.getColumnIndex(CallLog.Calls.DURATION)
+                val location = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    cursor.getColumnIndex(CallLog.Calls.LOCATION)
+                } else {
+                    null
+                }
                 while (cursor.moveToNext()) {
                     val callHistory = CallHistory(
                         name = cursor.getString(name),
                         number = cursor.getString(number),
-                        type = cursor.getString(type),
+                        type = cursor.getString(type).toInt(),
                         date = cursor.getString(date),
-                        duration = cursor.getString(duration)
+                        duration = cursor.getString(duration),
+                        location = if (location != null) cursor.getString(location) else ""
                     )
                     callLogs.add(callHistory)
                 }
@@ -92,6 +103,10 @@ object PhoneRepository {
 
                 withContext(Dispatchers.Default) {
                     emit(callLogs)
+                }
+            } else {
+                withContext(Dispatchers.Default) {
+                    emit(emptyList<CallHistory>())
                 }
             }
         }

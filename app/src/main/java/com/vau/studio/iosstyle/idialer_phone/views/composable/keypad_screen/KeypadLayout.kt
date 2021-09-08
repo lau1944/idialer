@@ -1,4 +1,4 @@
-package com.vau.studio.iosstyle.idialer_phone.views.composable.components
+package com.vau.studio.iosstyle.idialer_phone.views.composable.keypad_screen
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -10,6 +10,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.vau.studio.iosstyle.idialer_phone.data.models.KeypadNumber
 import com.vau.studio.iosstyle.idialer_phone.R
+import com.vau.studio.iosstyle.idialer_phone.views.composable.components.CallButton
+import com.vau.studio.iosstyle.idialer_phone.views.composable.components.NumberCircleButton
 
 @Composable
 fun KeypadLayout(
