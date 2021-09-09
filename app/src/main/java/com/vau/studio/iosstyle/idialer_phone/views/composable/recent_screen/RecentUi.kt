@@ -3,6 +3,7 @@ package com.vau.studio.iosstyle.idialer_phone.views.composable.recent_screen
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Button
 import androidx.compose.material.Scaffold
@@ -16,6 +17,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
@@ -29,6 +32,7 @@ import com.vau.studio.iosstyle.idialer_phone.views.composable.components.DeniedL
 import com.vau.studio.iosstyle.idialer_phone.views.composable.components.UiProgressLayout
 import com.vau.studio.iosstyle.idialer_phone.views.composable.keypad_screen.CallLogItem
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.CallViewModel
+import java.util.*
 
 @ExperimentalPermissionsApi
 @Composable
@@ -104,8 +108,21 @@ private fun CallList(histories: List<CallHistory>) {
 
     LazyColumn(
         content = {
-            items(histories.size) { i ->
-                CallLogItem(callHistory = histories[i])
+            items(histories.size + 1) { i ->
+                if (i == 0) {
+                    Text(
+                        "Recents",
+                        style = TextStyle(
+                            color = appColor().surface,
+                            fontSize = 30.sp,
+                            fontWeight = FontWeight.Bold
+                        ),
+                        modifier = Modifier.padding(10.dp)
+                    )
+                } else {
+                    val callLogIndex = i - 1
+                    CallLogItem(callHistory = histories[callLogIndex])
+                }
             }
         },
         verticalArrangement = Arrangement.Top

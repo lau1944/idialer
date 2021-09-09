@@ -38,21 +38,34 @@ fun KeypadLayout(
             }
         }
 
-        Box(modifier = Modifier.padding(10.dp), contentAlignment = Alignment.Center) {
+        Row(
+            modifier = Modifier
+                .padding(10.dp)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(modifier = Modifier.weight(1f))
             CallButton {
 
             }
-            if (hasNumber!!) {
-                Image(
-                    painter = painterResource(id = R.drawable.ic_cancel),
-                    contentDescription = "cancel_button",
-                    modifier = Modifier
-                        .padding(start = 175.dp)
-                        .size(35.dp)
-                        .clickable(
-                            onClick = onClear
-                        )
-                )
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .wrapContentWidth(Alignment.CenterHorizontally),
+                contentAlignment = Alignment.Center,
+            ) {
+                if (hasNumber!!) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_cancel),
+                        contentDescription = "cancel_button",
+                        modifier = Modifier
+                            .size(35.dp)
+                            .clickable(
+                                onClick = onClear
+                            )
+                    )
+                }
             }
         }
     }
