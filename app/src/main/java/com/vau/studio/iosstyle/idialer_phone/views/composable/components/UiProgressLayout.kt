@@ -12,9 +12,10 @@ import com.vau.studio.iosstyle.idialer_phone.data.models.UiState
 @Composable
 fun UiProgressLayout(
     state: UiState<Any>?,
+    alignment: Alignment? = Alignment.Center,
     loadingState: @Composable (() -> Unit)? = null,
     errorState: @Composable (() -> Unit)? = null,
-    successState: @Composable () -> Unit
+    successState: @Composable () -> Unit,
 ) {
     if (state == null) ProgressBox {
         CircularProgressIndicator()
@@ -27,18 +28,17 @@ fun UiProgressLayout(
         is UiState.Failed -> ProgressBox {
             errorState?.invoke() ?: Text("Something went wrong")
         }
-        is UiState.Success -> ProgressBox(false) {
+        is UiState.Success -> {
             successState.invoke()
         }
     }
 }
 
 @Composable
-private fun ProgressBox(isCenter: Boolean? = true, layout: @Composable () -> Unit) {
-    val alignment: Alignment = if (isCenter!!) Alignment.Center else Alignment.TopStart
+private fun ProgressBox(alignment: Alignment? = Alignment.Center, layout: @Composable () -> Unit) {
     Box(
         modifier = Modifier.fillMaxSize(),
-        contentAlignment = alignment
+        contentAlignment = alignment!!
     ) {
         layout()
     }

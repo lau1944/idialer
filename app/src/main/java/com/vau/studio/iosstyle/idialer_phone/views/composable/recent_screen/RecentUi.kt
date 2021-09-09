@@ -1,5 +1,6 @@
 package com.vau.studio.iosstyle.idialer_phone.views.composable.recent_screen
 
+import android.provider.CallLog
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,8 +24,10 @@ import androidx.compose.ui.unit.sp
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.vau.studio.iosstyle.idialer_phone.core.OpenUtil
+import com.vau.studio.iosstyle.idialer_phone.data.ALL_CALL_TYPE
 import com.vau.studio.iosstyle.idialer_phone.data.CALL_LOG_READ_PERMISSION
 import com.vau.studio.iosstyle.idialer_phone.data.CALL_LOG_WRITE_PERMISSION
+import com.vau.studio.iosstyle.idialer_phone.data.MISSED_CALL_TYPE
 import com.vau.studio.iosstyle.idialer_phone.data.models.CallHistory
 import com.vau.studio.iosstyle.idialer_phone.data.models.UiState
 import com.vau.studio.iosstyle.idialer_phone.views.composable.appColor
@@ -39,7 +42,7 @@ import java.util.*
 fun RecentUi(
     callViewModel: CallViewModel
 ) {
-    val callLogType = remember { mutableStateOf(0) }
+    val callLogType = callViewModel.callLogType.observeAsState()
     val callLogState = callViewModel.callLogState.observeAsState()
     val context = LocalContext.current
 
@@ -54,7 +57,7 @@ fun RecentUi(
         topBar = {
             RecentAppBar(
                 onSelected = { i ->
-                    callLogType.value = i
+                    queryCallType(callViewModel, i)
                 }
             )
         }
@@ -103,28 +106,39 @@ fun RecentUi(
 @Composable
 private fun CallList(histories: List<CallHistory>) {
     if (histories.isEmpty()) {
-        Text("No call history")
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text("No call history")
+        }
+    } else
+
+        LazyColumn(
+            content = {
+                items(histories.size + 1) { i ->
+                    if (i == 0) {
+                        Text(
+                            "Recents",
+                            style = TextStyle(
+                                color = appColor().surface,
+                                fontSize = 30.sp,
+                                fontWeight = FontWeight.Bold
+                            ),
+                            modifier = Modifier.padding(10.dp)
+                        )
+                    } else {
+                        val callLogIndex = i - 1
+                        CallLogItem(callHistory = histories[callLogIndex])
+                    }
+                }
+            },
+            verticalArrangement = Arrangement.Top
+        )
+}
+
+private fun queryCallType(callViewModel: CallViewModel, index: Int) {
+    if (index == 1) {
+        callViewModel.queryByType(MISSED_CALL_TYPE)
+    } else {
+        callViewModel.queryByType(ALL_CALL_TYPE)
     }
 
-    LazyColumn(
-        content = {
-            items(histories.size + 1) { i ->
-                if (i == 0) {
-                    Text(
-                        "Recents",
-                        style = TextStyle(
-                            color = appColor().surface,
-                            fontSize = 30.sp,
-                            fontWeight = FontWeight.Bold
-                        ),
-                        modifier = Modifier.padding(10.dp)
-                    )
-                } else {
-                    val callLogIndex = i - 1
-                    CallLogItem(callHistory = histories[callLogIndex])
-                }
-            }
-        },
-        verticalArrangement = Arrangement.Top
-    )
 }

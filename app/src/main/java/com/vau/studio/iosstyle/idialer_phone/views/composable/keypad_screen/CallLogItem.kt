@@ -60,9 +60,11 @@ fun CallLogItem(callHistory: CallHistory, onDelete: ((CallHistory) -> Unit)? = n
                         .padding(horizontal = 10.dp),
                     verticalArrangement = Arrangement.Center
                 ) {
+                    val textColor =
+                        if (isMissedCall(callHistory.type!!)) Color.Red else appColor().surface
                     Text(
-                        callHistory.name!!,
-                        style = TextStyle(color = appColor().surface, fontSize = 18.sp),
+                        callHistory.name ?: callHistory.number ?: "",
+                        style = TextStyle(color = textColor, fontSize = 18.sp),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -70,7 +72,9 @@ fun CallLogItem(callHistory: CallHistory, onDelete: ((CallHistory) -> Unit)? = n
                 }
 
                 Row(
-                    modifier = Modifier.padding(horizontal = 15.dp).fillMaxHeight(),
+                    modifier = Modifier
+                        .padding(horizontal = 15.dp)
+                        .fillMaxHeight(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.End
                 ) {
@@ -114,4 +118,8 @@ private fun handleCallDate(dateStr: String?): String {
         }
     }
     return DateUtil.parseToDateFormat(date)
+}
+
+private fun isMissedCall(type: Int): Boolean {
+    return CallLog.Calls.MISSED_TYPE == type
 }

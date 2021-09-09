@@ -8,6 +8,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.vau.studio.iosstyle.idialer_phone.data.ALL_CALL_TYPE
 import com.vau.studio.iosstyle.idialer_phone.data.models.CallHistory
 import com.vau.studio.iosstyle.idialer_phone.data.models.UiState
 import com.vau.studio.iosstyle.idialer_phone.data.repositories.PhoneRepository
@@ -30,6 +31,9 @@ class CallViewModel @Inject constructor(
     private lateinit var callHistories: List<CallHistory>
     private val _callLogState = MutableLiveData<UiState<List<CallHistory>>>(UiState.InProgress)
     val callLogState: LiveData<UiState<List<CallHistory>>> get() = _callLogState
+
+    private val _callLogType = MutableLiveData(ALL_CALL_TYPE)
+    val callLogType : LiveData<Int> get() = _callLogType
 
     companion object {
         const val TAG: String = "CallViewModel"
@@ -55,6 +59,26 @@ class CallViewModel @Inject constructor(
                 _callLogState.value = UiState.Success(data = histories)
                 callHistories = histories
             }
+        }
+    }
+
+    fun queryByType(type: Int) {
+        if (type == _callLogType.value) return
+
+        _callLogType.value = type
+        if (_callLogState.value is UiState.Success) {
+            if (type == ALL_CALL_TYPE) {
+                _callLogState.value = UiState.Success(callHistories)
+                return
+            }
+
+            val tempCallLogs = mutableListOf<CallHistory>().apply {
+                addAll(callHistories)
+            }
+            val queriedList = tempCallLogs.filter { call ->
+                call.type == type
+            }
+            _callLogState.value = UiState.Success(queriedList)
         }
     }
 }
