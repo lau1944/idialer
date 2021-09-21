@@ -111,4 +111,16 @@ object PhoneRepository {
             }
         }
     }
+
+    /**
+     * Delete call logs
+     * * if call id equal to null, then would delete all the call logs in default
+     */
+    fun deleteCallLog(
+        @ApplicationContext context: Context,
+        id: String?
+    ) {
+        val queryString = "DATE=${id ?: "*"}"
+        context.contentResolver.delete(CallLog.Calls.CONTENT_URI, queryString, null)
+    }
 }

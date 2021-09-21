@@ -44,12 +44,24 @@ class CallViewModel @Inject constructor(
     }
 
     /**
+     * Delete item from call history list
+     */
+    fun deleteHistory(callHistory: CallHistory) = viewModelScope.launch {
+        (callHistories as ArrayList<CallHistory>).remove(callHistory)
+        phoneRepository.deleteCallLog(context, callHistory.date)
+        _callLogState.value = UiState.Success(callHistories)
+    }
+
+    /**
      * Index of item where is on cancel mode
      */
     fun changeCancelState(callHistory: CallHistory) {
         _cancelStateItem.value = callHistory
     }
 
+    /**
+     * Get all the call history from Call Api
+     */
     fun getCallHistory() = viewModelScope.launch {
         phoneRepository.getCallLog(
             context, arrayOf(

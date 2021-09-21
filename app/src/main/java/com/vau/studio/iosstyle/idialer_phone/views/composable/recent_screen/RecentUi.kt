@@ -130,7 +130,10 @@ private fun CallList(histories: List<CallHistory>, callViewModel: CallViewModel)
                         CallLogItem(
                             callHistory = histories[callLogIndex],
                             callViewModel = callViewModel,
-                            onDrag = onDragItem.value == histories[callLogIndex]
+                            onDrag = onDragItem.value == histories[callLogIndex],
+                            onDelete = { callHistory ->
+                                callViewModel.deleteHistory(callHistory = callHistory)
+                            }
                         )
                     }
                 }
