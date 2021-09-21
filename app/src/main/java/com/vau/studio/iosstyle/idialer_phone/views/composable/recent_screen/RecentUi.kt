@@ -1,6 +1,7 @@
 package com.vau.studio.iosstyle.idialer_phone.views.composable.recent_screen
 
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -41,7 +42,6 @@ import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.CallViewModel
 fun RecentUi(
     callViewModel: CallViewModel
 ) {
-    val callLogType = callViewModel.callLogType.observeAsState()
     val callLogState = callViewModel.callLogState.observeAsState()
     val context = LocalContext.current
 

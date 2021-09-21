@@ -36,7 +36,7 @@ class CallViewModel @Inject constructor(
     private val _callLogType = MutableLiveData(ALL_CALL_TYPE)
     val callLogType : LiveData<Int> get() = _callLogType
 
-    private val _cancelStateItem = MutableLiveData<CallHistory>(null)
+    private val _cancelStateItem = MutableLiveData<CallHistory?>(null)
     val cancelStateItem : LiveData<CallHistory?> get() = _cancelStateItem
 
     companion object {
@@ -55,7 +55,7 @@ class CallViewModel @Inject constructor(
     /**
      * Index of item where is on cancel mode
      */
-    fun changeCancelState(callHistory: CallHistory) {
+    fun changeCancelState(callHistory: CallHistory?) {
         _cancelStateItem.value = callHistory
     }
 
