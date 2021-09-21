@@ -1,13 +1,18 @@
 package com.vau.studio.iosstyle.idialer_phone.views.composable.keypad_screen
 
 import android.provider.CallLog
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Divider
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -19,16 +24,29 @@ import com.vau.studio.iosstyle.idialer_phone.data.models.CallHistory
 import com.vau.studio.iosstyle.idialer_phone.views.composable.appColor
 import com.vau.studio.iosstyle.idialer_phone.views.composable.components.AssetImage
 import com.vau.studio.iosstyle.idialer_phone.views.composable.iosBlue
-import java.util.*
+import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.CallViewModel
+import kotlin.math.abs
 
+@ExperimentalMaterialApi
 @Composable
-fun CallLogItem(callHistory: CallHistory, onDelete: ((CallHistory) -> Unit)? = null) {
+fun CallLogItem(
+    callHistory: CallHistory,
+    onEdit: Boolean? = false,
+    onDrag: Boolean? = false,
+    callViewModel: CallViewModel,
+    onDelete: ((CallHistory) -> Unit)? = null
+) {
     Box(
         modifier = Modifier
             .height(55.dp)
             .fillMaxWidth(),
         contentAlignment = Alignment.Center
     ) {
+        val maxCancelAreaWidth = 95f
+        val cancelAreaWidth = remember { mutableStateOf(0f) }
+
+        if (!onDrag!!) cancelAreaWidth.value = 0f
+
         Column(
             verticalArrangement = Arrangement.Center,
         ) {
@@ -41,7 +59,24 @@ fun CallLogItem(callHistory: CallHistory, onDelete: ((CallHistory) -> Unit)? = n
             Row(
                 verticalAlignment = Alignment.Top,
                 modifier = Modifier
-                    .fillMaxSize(),
+                    .fillMaxSize()
+                    .pointerInput(Unit) {
+                        detectDragGestures(
+                            onDrag = { change, dragAmount ->
+                                callViewModel.changeCancelState(callHistory)
+
+                                val x = dragAmount.x
+                                cancelAreaWidth.value += -x
+                            },
+                            onDragEnd = {
+                                if (cancelAreaWidth.value < maxCancelAreaWidth / 2) {
+                                    cancelAreaWidth.value = 0f
+                                } else {
+                                    cancelAreaWidth.value = maxCancelAreaWidth
+                                }
+                            }
+                        )
+                    },
             ) {
                 if (callHistory.type == CallLog.Calls.OUTGOING_TYPE) {
                     AssetImage(
@@ -85,8 +120,32 @@ fun CallLogItem(callHistory: CallHistory, onDelete: ((CallHistory) -> Unit)? = n
                     )
                     AssetImage(res = R.drawable.ic_info, size = 22, color = iosBlue)
                 }
+
+                CancelArea(width = cancelAreaWidth.value, callHistory, onDelete)
             }
         }
+    }
+}
+
+@Composable
+private fun CancelArea(width: Float, callHistory: CallHistory, onDelete: ((CallHistory) -> Unit)?) {
+    Box(
+        modifier = Modifier
+            .width(width.dp)
+            .fillMaxHeight()
+            .background(Color.Red)
+            .clickable {
+                onDelete?.invoke(callHistory)
+            },
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            "Delete",
+            style = TextStyle(color = Color.White),
+            fontSize = 14.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }
 

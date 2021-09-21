@@ -3,6 +3,7 @@ package com.vau.studio.iosstyle.idialer_phone.views.viewmodels
 import android.annotation.SuppressLint
 import android.content.Context
 import android.provider.CallLog
+import android.telecom.Call
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -35,8 +36,18 @@ class CallViewModel @Inject constructor(
     private val _callLogType = MutableLiveData(ALL_CALL_TYPE)
     val callLogType : LiveData<Int> get() = _callLogType
 
+    private val _cancelStateItem = MutableLiveData<CallHistory>(null)
+    val cancelStateItem : LiveData<CallHistory?> get() = _cancelStateItem
+
     companion object {
         const val TAG: String = "CallViewModel"
+    }
+
+    /**
+     * Index of item where is on cancel mode
+     */
+    fun changeCancelState(callHistory: CallHistory) {
+        _cancelStateItem.value = callHistory
     }
 
     fun getCallHistory() = viewModelScope.launch {

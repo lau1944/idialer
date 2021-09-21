@@ -1,19 +1,18 @@
 package com.vau.studio.iosstyle.idialer_phone.views.composable.recent_screen
 
-import android.provider.CallLog
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Button
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -35,8 +34,8 @@ import com.vau.studio.iosstyle.idialer_phone.views.composable.components.DeniedL
 import com.vau.studio.iosstyle.idialer_phone.views.composable.components.UiProgressLayout
 import com.vau.studio.iosstyle.idialer_phone.views.composable.keypad_screen.CallLogItem
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.CallViewModel
-import java.util.*
 
+@ExperimentalMaterialApi
 @ExperimentalPermissionsApi
 @Composable
 fun RecentUi(
@@ -71,7 +70,7 @@ fun RecentUi(
 
                 UiProgressLayout(state = callLogState.value) {
                     val callLogs = (callLogState.value as UiState.Success).data
-                    CallList(histories = callLogs!!)
+                    CallList(histories = callLogs!!, callViewModel = callViewModel)
                 }
             }
 
@@ -103,13 +102,15 @@ fun RecentUi(
     }
 }
 
+@ExperimentalMaterialApi
 @Composable
-private fun CallList(histories: List<CallHistory>) {
+private fun CallList(histories: List<CallHistory>, callViewModel: CallViewModel) {
     if (histories.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("No call history")
         }
-    } else
+    } else {
+        val onDragItem = callViewModel.cancelStateItem.observeAsState()
 
         LazyColumn(
             content = {
@@ -126,12 +127,17 @@ private fun CallList(histories: List<CallHistory>) {
                         )
                     } else {
                         val callLogIndex = i - 1
-                        CallLogItem(callHistory = histories[callLogIndex])
+                        CallLogItem(
+                            callHistory = histories[callLogIndex],
+                            callViewModel = callViewModel,
+                            onDrag = onDragItem.value == histories[callLogIndex]
+                        )
                     }
                 }
             },
             verticalArrangement = Arrangement.Top
         )
+    }
 }
 
 private fun queryCallType(callViewModel: CallViewModel, index: Int) {
@@ -140,5 +146,4 @@ private fun queryCallType(callViewModel: CallViewModel, index: Int) {
     } else {
         callViewModel.queryByType(ALL_CALL_TYPE)
     }
-
 }
