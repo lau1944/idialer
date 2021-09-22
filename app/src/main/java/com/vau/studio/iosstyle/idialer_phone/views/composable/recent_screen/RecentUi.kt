@@ -1,7 +1,5 @@
 package com.vau.studio.iosstyle.idialer_phone.views.composable.recent_screen
 
-
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -43,6 +41,7 @@ fun RecentUi(
     callViewModel: CallViewModel
 ) {
     val callLogState = callViewModel.callLogState.observeAsState()
+    val onEdit = callViewModel.isEditState.observeAsState()
     val context = LocalContext.current
 
     val callLogPermissionState = rememberMultiplePermissionsState(
@@ -55,8 +54,12 @@ fun RecentUi(
     Scaffold(
         topBar = {
             RecentAppBar(
+                onEditMode = onEdit.value!!,
                 onSelected = { i ->
                     queryCallType(callViewModel, i)
+                },
+                onEdit = {
+                    callViewModel.changeEditState(it)
                 }
             )
         }
@@ -70,7 +73,11 @@ fun RecentUi(
 
                 UiProgressLayout(state = callLogState.value) {
                     val callLogs = (callLogState.value as UiState.Success).data
-                    CallList(histories = callLogs!!, callViewModel = callViewModel)
+                    CallList(
+                        histories = callLogs!!,
+                        callViewModel = callViewModel,
+                        onEdit = onEdit.value!!
+                    )
                 }
             }
 
@@ -104,14 +111,13 @@ fun RecentUi(
 
 @ExperimentalMaterialApi
 @Composable
-private fun CallList(histories: List<CallHistory>, callViewModel: CallViewModel) {
+private fun CallList(histories: List<CallHistory>, callViewModel: CallViewModel, onEdit: Boolean) {
     if (histories.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("No call history")
         }
     } else {
         val onDragItem = callViewModel.cancelStateItem.observeAsState()
-
 
         LazyColumn(
             content = {
@@ -131,6 +137,7 @@ private fun CallList(histories: List<CallHistory>, callViewModel: CallViewModel)
                         CallLogItem(
                             callHistory = histories[callLogIndex],
                             callViewModel = callViewModel,
+                            onEdit = onEdit,
                             onDrag = onDragItem.value == histories[callLogIndex],
                             onDelete = { callHistory ->
                                 callViewModel.deleteHistory(callHistory = callHistory)

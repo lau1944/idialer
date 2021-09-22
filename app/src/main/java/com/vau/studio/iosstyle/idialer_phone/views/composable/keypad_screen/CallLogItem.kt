@@ -82,10 +82,15 @@ fun CallLogItem(
                         )
                     },
             ) {
-
                 if (onEdit!!) {
                     Box(
-                        modifier = Modifier.padding(horizontal = 15.dp),
+                        modifier = Modifier
+                            .padding(horizontal = 15.dp)
+                            .width(30.dp)
+                            .fillMaxHeight()
+                            .clickable {
+                                // todo: show delete dialog
+                            },
                         contentAlignment = Alignment.Center
                     ) {
                         AssetImage(res = R.drawable.ic_minus, size = 20)

@@ -9,7 +9,7 @@ import com.vau.studio.iosstyle.idialer_phone.core.ColorUtils
 fun CallButton(onPressed: () -> Unit) {
     CircleButton(
         content = {
-            AssetImage(res = R.drawable.ic_phone, size = 25, Color.White)
+            AssetImage(res = R.drawable.ic_phone, size = 25, color = Color.White)
         }, onTap = onPressed, color = ColorUtils.parseColor("#19e660")
     )
 }

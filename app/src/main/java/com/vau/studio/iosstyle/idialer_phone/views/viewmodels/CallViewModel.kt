@@ -39,8 +39,18 @@ class CallViewModel @Inject constructor(
     private val _cancelStateItem = MutableLiveData<CallHistory?>(null)
     val cancelStateItem : LiveData<CallHistory?> get() = _cancelStateItem
 
+    private val _isEditState = MutableLiveData<Boolean>(false)
+    val isEditState : LiveData<Boolean> get() = _isEditState
+
     companion object {
         const val TAG: String = "CallViewModel"
+    }
+
+    /**
+     * Change state of edit mode
+     */
+    fun changeEditState(onEdit: Boolean) {
+        _isEditState.value = onEdit
     }
 
     /**
