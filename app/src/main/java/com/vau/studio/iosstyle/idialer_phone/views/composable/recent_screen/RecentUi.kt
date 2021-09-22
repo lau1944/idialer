@@ -112,6 +112,7 @@ private fun CallList(histories: List<CallHistory>, callViewModel: CallViewModel)
     } else {
         val onDragItem = callViewModel.cancelStateItem.observeAsState()
 
+
         LazyColumn(
             content = {
                 items(histories.size + 1) { i ->

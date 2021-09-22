@@ -39,7 +39,12 @@ fun CallLogItem(
     Box(
         modifier = Modifier
             .height(55.dp)
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .clickable {
+                if (onDrag!!) {
+                    callViewModel.changeCancelState(null)
+                }
+            },
         contentAlignment = Alignment.Center
     ) {
         val maxCancelAreaWidth = 95f
@@ -53,7 +58,6 @@ fun CallLogItem(
             Divider(
                 color = Color.LightGray.copy(alpha = 0.2f),
                 thickness = 1.dp,
-                modifier = Modifier.padding(horizontal = 25.dp, vertical = 4.dp)
             )
 
             Row(
@@ -78,6 +82,16 @@ fun CallLogItem(
                         )
                     },
             ) {
+
+                if (onEdit!!) {
+                    Box(
+                        modifier = Modifier.padding(horizontal = 15.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        AssetImage(res = R.drawable.ic_minus, size = 20)
+                    }
+                }
+
                 if (callHistory.type == CallLog.Calls.OUTGOING_TYPE) {
                     AssetImage(
                         res = R.drawable.ic_outgoing_call,
