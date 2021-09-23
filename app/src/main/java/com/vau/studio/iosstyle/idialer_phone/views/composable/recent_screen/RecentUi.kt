@@ -12,6 +12,8 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -30,6 +32,8 @@ import com.vau.studio.iosstyle.idialer_phone.data.models.CallHistory
 import com.vau.studio.iosstyle.idialer_phone.data.models.UiState
 import com.vau.studio.iosstyle.idialer_phone.views.composable.appColor
 import com.vau.studio.iosstyle.idialer_phone.views.composable.components.DeniedLayout
+import com.vau.studio.iosstyle.idialer_phone.views.composable.components.SelectionDialog
+import com.vau.studio.iosstyle.idialer_phone.views.composable.components.SelectionOption
 import com.vau.studio.iosstyle.idialer_phone.views.composable.components.UiProgressLayout
 import com.vau.studio.iosstyle.idialer_phone.views.composable.keypad_screen.CallLogItem
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.CallViewModel
@@ -43,6 +47,23 @@ fun RecentUi(
     val callLogState = callViewModel.callLogState.observeAsState()
     val onEdit = callViewModel.isEditState.observeAsState()
     val context = LocalContext.current
+
+    val showClearDialog = remember {
+        mutableStateOf(false)
+    }
+
+    if (showClearDialog.value) {
+        SelectionDialog(
+            options = listOf(
+                SelectionOption(
+                    "Clear All Recents"
+                ),
+            ),
+            onDismiss = {
+                showClearDialog.value = false
+            }
+        )
+    }
 
     val callLogPermissionState = rememberMultiplePermissionsState(
         permissions = listOf(
@@ -60,6 +81,9 @@ fun RecentUi(
                 },
                 onEdit = {
                     callViewModel.changeEditState(it)
+                },
+                onClear = {
+                    showClearDialog.value = true
                 }
             )
         }
