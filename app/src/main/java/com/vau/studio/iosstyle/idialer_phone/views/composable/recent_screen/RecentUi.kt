@@ -9,11 +9,8 @@ import androidx.compose.material.Button
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -44,8 +41,8 @@ import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.CallViewModel
 fun RecentUi(
     callViewModel: CallViewModel
 ) {
-    val callLogState = callViewModel.callLogState.observeAsState()
-    val onEdit = callViewModel.isEditState.observeAsState()
+    val callLogState by callViewModel.callLogState.observeAsState()
+    val onEdit by callViewModel.isEditState.observeAsState(false)
     val context = LocalContext.current
 
     val showClearDialog = remember {
@@ -56,7 +53,12 @@ fun RecentUi(
         SelectionDialog(
             options = listOf(
                 SelectionOption(
-                    "Clear All Recents"
+                    "Clear All Recents",
+                    onTap = {
+                        showClearDialog.value = false
+                        callViewModel.deleteHistory()
+                        callViewModel.changeEditState(false)
+                    }
                 ),
             ),
             onDismiss = {
@@ -75,7 +77,7 @@ fun RecentUi(
     Scaffold(
         topBar = {
             RecentAppBar(
-                onEditMode = onEdit.value!!,
+                onEditMode = onEdit,
                 onSelected = { i ->
                     queryCallType(callViewModel, i)
                 },
@@ -95,12 +97,12 @@ fun RecentUi(
                     callViewModel.getCallHistory()
                 }
 
-                UiProgressLayout(state = callLogState.value) {
-                    val callLogs = (callLogState.value as UiState.Success).data
+                UiProgressLayout(state = callLogState) {
+                    val callLogs = (callLogState as UiState.Success).data
                     CallList(
                         histories = callLogs!!,
                         callViewModel = callViewModel,
-                        onEdit = onEdit.value!!
+                        onEdit = onEdit
                     )
                 }
             }
@@ -136,13 +138,13 @@ fun RecentUi(
 @ExperimentalMaterialApi
 @Composable
 private fun CallList(histories: List<CallHistory>, callViewModel: CallViewModel, onEdit: Boolean) {
+    val onEditItemIndex by callViewModel.cancelStateIndex.observeAsState()
+
     if (histories.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("No call history")
         }
     } else {
-        val onDragItem = callViewModel.cancelStateItem.observeAsState()
-
         LazyColumn(
             content = {
                 items(histories.size + 1) { i ->
@@ -160,10 +162,16 @@ private fun CallList(histories: List<CallHistory>, callViewModel: CallViewModel,
                         val callLogIndex = i - 1
                         CallLogItem(
                             callHistory = histories[callLogIndex],
-                            callViewModel = callViewModel,
+                            isOnDeleteMode = onEditItemIndex == callLogIndex,
+                            onTap = {
+                                callViewModel.changeCancelState()
+                            },
+                            onDrag = {
+                                callViewModel.changeCancelState(histories.indexOf(it))
+                            },
                             onEdit = onEdit,
-                            onDrag = onDragItem.value == histories[callLogIndex],
                             onDelete = { callHistory ->
+                                callViewModel.changeCancelState()
                                 callViewModel.deleteHistory(callHistory = callHistory)
                             }
                         )
