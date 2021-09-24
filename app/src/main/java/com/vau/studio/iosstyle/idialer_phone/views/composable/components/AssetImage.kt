@@ -11,10 +11,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun AssetImage(@DrawableRes res: Int, size: Int, color: Color?, modifier: Modifier? = Modifier) {
+fun AssetImage(
+    modifier: Modifier = Modifier,
+    @DrawableRes res: Int,
+    size: Int,
+    color: Color? = null,
+) {
     Image(
         painter = painterResource(id = res),
-        modifier = modifier!!.size(size.dp),
+        modifier = modifier.size(size.dp),
         contentDescription = "asset_image",
         colorFilter = if (color != null) ColorFilter.tint(color) else null
     )

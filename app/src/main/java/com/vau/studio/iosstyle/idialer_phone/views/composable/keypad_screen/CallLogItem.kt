@@ -3,15 +3,18 @@ package com.vau.studio.iosstyle.idialer_phone.views.composable.keypad_screen
 import android.provider.CallLog
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.consumeAllChanges
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
@@ -25,27 +28,30 @@ import com.vau.studio.iosstyle.idialer_phone.views.composable.appColor
 import com.vau.studio.iosstyle.idialer_phone.views.composable.components.AssetImage
 import com.vau.studio.iosstyle.idialer_phone.views.composable.iosBlue
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.CallViewModel
-import kotlin.math.abs
 
 @ExperimentalMaterialApi
 @Composable
 fun CallLogItem(
     callHistory: CallHistory,
+    isOnDeleteMode: Boolean? = false,
     onEdit: Boolean? = false,
-    onDrag: Boolean? = false,
-    callViewModel: CallViewModel,
+    onTap: ((CallHistory) -> Unit)? = null,
+    onDrag: ((CallHistory) -> Unit)? = null,
     onDelete: ((CallHistory) -> Unit)? = null
 ) {
     Box(
         modifier = Modifier
             .height(55.dp)
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .clickable {
+                onTap?.invoke(callHistory)
+            },
         contentAlignment = Alignment.Center
     ) {
         val maxCancelAreaWidth = 95f
         val cancelAreaWidth = remember { mutableStateOf(0f) }
 
-        if (!onDrag!!) cancelAreaWidth.value = 0f
+        if (!isOnDeleteMode!!) cancelAreaWidth.value = 0f
 
         Column(
             verticalArrangement = Arrangement.Center,
@@ -53,7 +59,6 @@ fun CallLogItem(
             Divider(
                 color = Color.LightGray.copy(alpha = 0.2f),
                 thickness = 1.dp,
-                modifier = Modifier.padding(horizontal = 25.dp, vertical = 4.dp)
             )
 
             Row(
@@ -61,12 +66,12 @@ fun CallLogItem(
                 modifier = Modifier
                     .fillMaxSize()
                     .pointerInput(Unit) {
-                        detectDragGestures(
-                            onDrag = { change, dragAmount ->
-                                callViewModel.changeCancelState(callHistory)
+                        detectHorizontalDragGestures(
+                            onHorizontalDrag = { change, dragAmount ->
+                                change.consumeAllChanges()
 
-                                val x = dragAmount.x
-                                cancelAreaWidth.value += -x
+                                onDrag?.invoke(callHistory)
+                                cancelAreaWidth.value += -dragAmount
                             },
                             onDragEnd = {
                                 if (cancelAreaWidth.value < maxCancelAreaWidth / 2) {
@@ -74,10 +79,25 @@ fun CallLogItem(
                                 } else {
                                     cancelAreaWidth.value = maxCancelAreaWidth
                                 }
-                            }
+                            },
                         )
                     },
             ) {
+                if (onEdit!!) {
+                    Box(
+                        modifier = Modifier
+                            .padding(horizontal = 15.dp)
+                            .width(30.dp)
+                            .fillMaxHeight()
+                            .clickable {
+                                onDelete?.invoke(callHistory)
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        AssetImage(res = R.drawable.ic_minus, size = 20)
+                    }
+                }
+
                 if (callHistory.type == CallLog.Calls.OUTGOING_TYPE) {
                     AssetImage(
                         res = R.drawable.ic_outgoing_call,

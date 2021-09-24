@@ -21,7 +21,12 @@ import com.vau.studio.iosstyle.idialer_phone.views.composable.appColor
 import com.vau.studio.iosstyle.idialer_phone.views.composable.iosBlue
 
 @Composable
-fun RecentAppBar(onSelected: ((Int) -> Unit)? = null, onEdit: (() -> Unit)? = null) {
+fun RecentAppBar(
+    onEditMode: Boolean = false,
+    onSelected: ((Int) -> Unit)? = null,
+    onEdit: ((Boolean) -> Unit)? = null,
+    onClear: (() -> Unit)? = null
+) {
     val selectionTextStyle = remember { TextStyle(Color.Black, fontSize = 14.sp) }
 
     TopAppBar(
@@ -37,6 +42,26 @@ fun RecentAppBar(onSelected: ((Int) -> Unit)? = null, onEdit: (() -> Unit)? = nu
                 .fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
+            if (onEditMode) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    contentAlignment = Alignment.CenterStart,
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .clickable {
+                                onClear?.invoke()
+                            },
+                    ) {
+                        Text(
+                            "Clear",
+                            style = TextStyle(color = iosBlue, fontSize = 15.sp)
+                        )
+                    }
+                }
+            }
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth(),
@@ -45,10 +70,13 @@ fun RecentAppBar(onSelected: ((Int) -> Unit)? = null, onEdit: (() -> Unit)? = nu
                 Box(
                     modifier = Modifier
                         .clickable {
-                            onEdit?.invoke()
+                            onEdit?.invoke(!onEditMode)
                         },
-                    ) {
-                    Text("Edit", style = TextStyle(color = iosBlue, fontSize = 15.sp))
+                ) {
+                    Text(
+                        if (onEditMode) "Done" else "Edit",
+                        style = TextStyle(color = iosBlue, fontSize = 15.sp)
+                    )
                 }
             }
 

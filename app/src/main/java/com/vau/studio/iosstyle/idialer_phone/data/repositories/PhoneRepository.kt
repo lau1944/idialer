@@ -120,7 +120,11 @@ object PhoneRepository {
         @ApplicationContext context: Context,
         id: String?
     ) {
-        val queryString = "DATE=${id ?: "*"}"
-        context.contentResolver.delete(CallLog.Calls.CONTENT_URI, queryString, null)
+        val queryString = "DATE=$id"
+        context.contentResolver.delete(
+            CallLog.Calls.CONTENT_URI,
+            if (id != null) queryString else null,
+            null
+        )
     }
 }

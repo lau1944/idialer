@@ -3,7 +3,6 @@ package com.vau.studio.iosstyle.idialer_phone.views.viewmodels
 import android.annotation.SuppressLint
 import android.content.Context
 import android.provider.CallLog
-import android.telecom.Call
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -34,29 +33,52 @@ class CallViewModel @Inject constructor(
     val callLogState: LiveData<UiState<List<CallHistory>>> get() = _callLogState
 
     private val _callLogType = MutableLiveData(ALL_CALL_TYPE)
-    val callLogType : LiveData<Int> get() = _callLogType
+    val callLogType: LiveData<Int> get() = _callLogType
 
-    private val _cancelStateItem = MutableLiveData<CallHistory?>(null)
-    val cancelStateItem : LiveData<CallHistory?> get() = _cancelStateItem
+    private val _cancelStateIndex = MutableLiveData<Int?>(null)
+    val cancelStateIndex: LiveData<Int?> get() = _cancelStateIndex
+
+    private val _isEditState = MutableLiveData<Boolean>(false)
+    val isEditState: LiveData<Boolean> get() = _isEditState
 
     companion object {
         const val TAG: String = "CallViewModel"
     }
 
     /**
-     * Delete item from call history list
+     * Change state of edit mode
      */
-    fun deleteHistory(callHistory: CallHistory) = viewModelScope.launch {
-        (callHistories as ArrayList<CallHistory>).remove(callHistory)
-        phoneRepository.deleteCallLog(context, callHistory.date)
-        _callLogState.value = UiState.Success(callHistories)
+    fun changeEditState(onEdit: Boolean) {
+        _isEditState.value = onEdit
+    }
+
+    /**
+     * Delete item from call history list
+     * If [callHistory] pass as Null, we clear all the call logs by default
+     */
+    fun deleteHistory(callHistory: CallHistory? = null)  {
+        if (_callLogState.value is UiState.Success) {
+            if (callHistory == null) {
+                (callHistories as ArrayList<CallHistory>).clear()
+            } else {
+                (callHistories as ArrayList<CallHistory>).remove(callHistory)
+            }
+            val temperList = mutableListOf<CallHistory>().apply {
+                addAll(callHistories)
+            }
+            //phoneRepository.deleteCallLog(context, callHistory?.date)
+            _callLogState.value = UiState.Success(temperList)
+        }
     }
 
     /**
      * Index of item where is on cancel mode
      */
-    fun changeCancelState(callHistory: CallHistory?) {
-        _cancelStateItem.value = callHistory
+    fun changeCancelState(index: Int? = null) {
+        if (index == null || index < 0 || index >= callHistories.size) {
+            _cancelStateIndex.value = null
+        }
+        _cancelStateIndex.value = index
     }
 
     /**
@@ -78,11 +100,11 @@ class CallViewModel @Inject constructor(
                 _callLogState.value = UiState.Failed(e)
             }
             .collect { histories ->
-            if (histories != null) {
-                _callLogState.value = UiState.Success(data = histories)
-                callHistories = histories
+                if (histories != null) {
+                    _callLogState.value = UiState.Success(data = histories)
+                    callHistories = histories
+                }
             }
-        }
     }
 
     fun queryByType(type: Int) {
