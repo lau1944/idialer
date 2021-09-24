@@ -3,9 +3,11 @@ jobs:
   build:
     working_directory: ~/code
     docker:
-      - image: circleci/android:api-30-alpha
+      image: circleci/openjdk:11.0.3-jdk-stretch
     environment:
-      JVM_OPTS: -Xmx4G
+      # Configure the JVM and Gradle to avoid OOM errors
+      _JAVA_OPTIONS: "-Xmx3g"
+      GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2"
     steps:
       - checkout
       - run: echo "Checking out gradle cache..."
