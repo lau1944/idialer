@@ -5,9 +5,9 @@ jobs:
     environment:
       # Configure the JVM and Gradle to avoid OOM errors
       _JAVA_OPTIONS: -Xmx4G
-      docker: # run the steps with Docker
-        - image: circleci/openjdk:11.0.3-jdk-stretch
-        - image: circleci/android:api-25-alpha
+    docker: # run the steps with Docker
+      - image: circleci/openjdk:11.0.3-jdk-stretch
+      - image: circleci/android:api-25-alpha
     steps:
       - checkout
       - run: echo "Checking out gradle cache..."
