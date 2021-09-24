@@ -28,6 +28,7 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.vau.studio.iosstyle.idialer_phone.core.OpenUtil
 import com.vau.studio.iosstyle.idialer_phone.data.CONTACT_READ_PERMISSION
 import com.vau.studio.iosstyle.idialer_phone.data.CONTACT_WRITE_PERMISSION
+import com.vau.studio.iosstyle.idialer_phone.data.models.Contact
 import com.vau.studio.iosstyle.idialer_phone.data.models.UiState
 import com.vau.studio.iosstyle.idialer_phone.views.composable.appColor
 import com.vau.studio.iosstyle.idialer_phone.views.composable.components.DeniedLayout
@@ -71,7 +72,7 @@ fun ContactUi(
                         })
 
                         UiProgressLayout(state = contactState) {
-                            val contacts = (contactState as UiState.Success).data as List<String>
+                            val contacts = (contactState as UiState.Success).data as List<Contact>
                             if (contacts.isNullOrEmpty()) {
                                 Box(
                                     contentAlignment = Alignment.Center,
@@ -119,8 +120,8 @@ fun ContactUi(
 
 @ExperimentalFoundationApi
 @Composable
-private fun ContactList(contactNames: List<String>, scrollState: LazyListState) {
-    val groupedContacts = contactNames.groupBy { it.first().toString() }
+private fun ContactList(contactNames: List<Contact>, scrollState: LazyListState) {
+    val groupedContacts = contactNames.groupBy { it.name?.first().toString() }
 
     LazyColumn(
         content = {
@@ -129,7 +130,7 @@ private fun ContactList(contactNames: List<String>, scrollState: LazyListState) 
                     CharacterHeader(character = initial)
                 }
 
-                items(contactsInitial) { name ->
+                items(contactsInitial) { contact ->
                     Box(
                         modifier = Modifier
                             .padding(vertical = 6.dp, horizontal = 10.dp)
@@ -139,7 +140,7 @@ private fun ContactList(contactNames: List<String>, scrollState: LazyListState) 
                             horizontalAlignment = Alignment.Start
                         ) {
                             Text(
-                                name,
+                                contact.name ?: "",
                                 style = TextStyle(color = appColor().surface, fontSize = 16.sp),
                                 modifier = Modifier.padding(vertical = 10.dp)
                             )

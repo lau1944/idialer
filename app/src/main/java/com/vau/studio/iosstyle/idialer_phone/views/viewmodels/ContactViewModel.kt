@@ -8,6 +8,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.vau.studio.iosstyle.idialer_phone.data.models.Contact
 import com.vau.studio.iosstyle.idialer_phone.data.models.UiState
 import com.vau.studio.iosstyle.idialer_phone.data.repositories.PhoneRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,9 +27,9 @@ class ContactViewModel @Inject constructor(
     private val phoneRepository: PhoneRepository
 ) : ViewModel() {
 
-    private val _queriedContactState = MutableLiveData<UiState<List<String>>>()
-    private val _contactList = MutableLiveData<List<String>>()
-    val contactListState: LiveData<UiState<List<String>>> get() = _queriedContactState
+    private val _queriedContactState = MutableLiveData<UiState<List<Contact>>>()
+    private val _contactList = MutableLiveData<List<Contact>>()
+    val contactListState: LiveData<UiState<List<Contact>>> get() = _queriedContactState
 
     companion object {
         const val TAG: String = "ContactViewModel"
@@ -66,8 +67,8 @@ class ContactViewModel @Inject constructor(
                 state.copy(data = contacts)
 
             contacts.let {
-                _queriedContactState.value = state.copy(it?.filter { name ->
-                    name.startsWith(query!!)
+                _queriedContactState.value = state.copy(it?.filter { contact ->
+                    contact.name?.startsWith(query!!) ?: false
                 })
             }
         }

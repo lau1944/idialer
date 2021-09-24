@@ -10,6 +10,7 @@ import android.provider.ContactsContract
 import androidx.annotation.RequiresApi
 import androidx.core.database.getStringOrNull
 import com.vau.studio.iosstyle.idialer_phone.data.models.CallHistory
+import com.vau.studio.iosstyle.idialer_phone.data.models.Contact
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -27,27 +28,45 @@ object PhoneRepository {
     fun getContactNames(
         @ApplicationContext context: Context,
         lookUp: String?
-    ): Flow<List<String>?> = flow {
+    ): Flow<List<Contact>?> = flow {
         withContext(Dispatchers.IO) {
             val cursor = context.contentResolver.query(
                 ContactsContract.Data.CONTENT_URI,
                 arrayOf(
                     ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
+                    ContactsContract.CommonDataKinds.Email.DATA,
+                    ContactsContract.CommonDataKinds.Phone.NUMBER,
+                    ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
+                    ContactsContract.CommonDataKinds.Phone.PHOTO_URI,
                 ),
                 lookUp,
                 null,
                 ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC"
             )
             if (cursor != null) {
-                val contacts = mutableListOf<String>()
+                val contacts = mutableListOf<Contact>()
                 while (cursor.moveToNext()) {
                     val nameIndex =
                         cursor.getColumnIndex(
                             ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
                         )
-                    if (nameIndex > -1) {
-                        contacts.add(cursor.getStringOrNull(nameIndex) ?: "")
-                    }
+                    val emailIndex =
+                        cursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA)
+                    val numberIndex =
+                        cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)
+                    val idIndex =
+                        cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_ID)
+                    val phoneUrlIndex =
+                        cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.PHOTO_URI)
+                    contacts.add(
+                        Contact(
+                            name = cursor.getString(nameIndex),
+                            email = cursor.getString(emailIndex),
+                            number = cursor.getString(numberIndex),
+                            contactId = cursor.getString(idIndex),
+                            phoneUrl = cursor.getString(phoneUrlIndex)
+                        )
+                    )
                 }
                 cursor.close()
 
@@ -56,7 +75,7 @@ object PhoneRepository {
                 }
             } else {
                 withContext(Dispatchers.Default) {
-                    emit(emptyList<String>())
+                    emit(emptyList<Contact>())
                 }
             }
         }

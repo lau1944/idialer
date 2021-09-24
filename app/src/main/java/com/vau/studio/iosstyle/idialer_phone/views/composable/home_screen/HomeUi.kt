@@ -1,5 +1,6 @@
 package com.vau.studio.iosstyle.idialer_phone.views.composable.home_screen
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
@@ -28,6 +29,7 @@ import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.CallViewModel
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.ContactViewModel
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.MainViewModel
 
+@ExperimentalFoundationApi
 @ExperimentalMaterialApi
 @ExperimentalPermissionsApi
 @Composable
@@ -60,6 +62,7 @@ fun HomeScreen(
     }
 }
 
+@ExperimentalFoundationApi
 @ExperimentalMaterialApi
 @ExperimentalPermissionsApi
 @Composable

@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -27,6 +28,7 @@ class MainActivity : ComponentActivity() {
     private val contactViewModel: ContactViewModel by viewModels()
     private val callViewModel: CallViewModel by viewModels()
 
+    @ExperimentalFoundationApi
     @ExperimentalMaterialApi
     @ExperimentalPermissionsApi
     override fun onCreate(savedInstanceState: Bundle?) {
