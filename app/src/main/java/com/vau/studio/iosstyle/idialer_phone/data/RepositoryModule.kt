@@ -8,6 +8,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineDispatcher
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -15,9 +16,10 @@ internal object RepositoryModule {
 
     @Provides
     fun provideFavoriteRepository(
-        favoriteDao: FavoriteDao
+        favoriteDao: FavoriteDao,
+        dispatcher: CoroutineDispatcher = DispatcherModule.provideIoDispatcher()
     ): FavoriteRepository {
-        return FavoriteRepository(favoriteDao)
+        return FavoriteRepository(dispatcher, favoriteDao)
     }
 
     @Provides

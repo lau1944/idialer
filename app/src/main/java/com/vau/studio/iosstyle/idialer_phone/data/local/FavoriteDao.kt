@@ -2,20 +2,39 @@ package com.vau.studio.iosstyle.idialer_phone.data.local
 
 import androidx.room.*
 import com.vau.studio.iosstyle.idialer_phone.data.models.Contact
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface FavoriteDao {
 
+    /**
+     * get all favorite contact
+     */
     @Query("SELECT * FROM contact")
-    fun readAllFavorites(): List<Contact>
+    suspend fun readAllFavorites(): Flow<List<Contact>>
 
+    /**
+     * Update one contact info
+     */
     @Update
-    fun updateFavorite(contact: Contact)
+    suspend fun updateFavorite(contact: Contact): Long
 
+    /**
+     * add 1 favorite contact
+     */
     @Insert
-    fun insertFavorite(contact: Contact)
+    suspend fun insertFavorite(contact: Contact): Long
 
+    /**
+     * Delete specific contact
+     */
     @Delete
-    fun deleteFavorite(contact: Contact)
+    suspend fun deleteFavorite(contact: Contact): Long
+
+    /**
+     * Delete all contacts
+     */
+    @Delete
+    suspend fun deleteAll(): Long
 
 }

@@ -2,8 +2,6 @@ package com.vau.studio.iosstyle.idialer_phone.views.viewmodels
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.provider.ContactsContract
-import androidx.core.database.getStringOrNull
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
