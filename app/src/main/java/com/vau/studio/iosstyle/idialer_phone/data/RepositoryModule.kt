@@ -1,5 +1,6 @@
 package com.vau.studio.iosstyle.idialer_phone.data
 
+import com.vau.studio.iosstyle.idialer_phone.core.IoDispatcher
 import com.vau.studio.iosstyle.idialer_phone.data.local.FavoriteDao
 import com.vau.studio.iosstyle.idialer_phone.data.local.SharePreferenceClient
 import com.vau.studio.iosstyle.idialer_phone.data.repositories.FavoriteRepository
@@ -17,7 +18,7 @@ internal object RepositoryModule {
     @Provides
     fun provideFavoriteRepository(
         favoriteDao: FavoriteDao,
-        dispatcher: CoroutineDispatcher = DispatcherModule.provideIoDispatcher()
+        @IoDispatcher dispatcher: CoroutineDispatcher
     ): FavoriteRepository {
         return FavoriteRepository(dispatcher, favoriteDao)
     }

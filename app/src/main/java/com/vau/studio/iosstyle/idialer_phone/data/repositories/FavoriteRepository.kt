@@ -26,11 +26,11 @@ class FavoriteRepository @Inject constructor(
         favoriteDao.updateFavorite(contact = contact)
     }
 
-    suspend fun deleteFavorite(contact: Contact): Long = withContext(dispatcher) {
+    suspend fun deleteFavorite(contact: Contact) = withContext(dispatcher) {
         favoriteDao.deleteFavorite(contact = contact)
     }
 
-    suspend fun deleteAllFavorite(): Long = withContext(dispatcher) {
+    suspend fun deleteAllFavorite(): Int = withContext(dispatcher) {
         favoriteDao.deleteAll()
     }
 }

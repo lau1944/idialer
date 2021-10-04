@@ -11,30 +11,30 @@ interface FavoriteDao {
      * get all favorite contact
      */
     @Query("SELECT * FROM contact")
-    suspend fun readAllFavorites(): Flow<List<Contact>>
+    fun readAllFavorites(): Flow<List<Contact>>
 
     /**
      * Update one contact info
      */
     @Update
-    suspend fun updateFavorite(contact: Contact): Long
+    fun updateFavorite(contact: Contact): Int
 
     /**
      * add 1 favorite contact
      */
-    @Insert
-    suspend fun insertFavorite(contact: Contact): Long
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertFavorite(contact: Contact): Long
 
     /**
      * Delete specific contact
      */
     @Delete
-    suspend fun deleteFavorite(contact: Contact): Long
+    fun deleteFavorite(contact: Contact)
 
     /**
      * Delete all contacts
      */
-    @Delete
-    suspend fun deleteAll(): Long
+    @Query("DELETE FROM contact")
+    fun deleteAll(): Int
 
 }

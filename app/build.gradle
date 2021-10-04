@@ -9,6 +9,10 @@ android {
     compileSdkVersion 31
     buildToolsVersion "30.0.3"
 
+    packagingOptions {
+        exclude 'META-INF/atomicfu.kotlin_module'
+    }
+
     defaultConfig {
         applicationId "com.vau.studio.iosstyle.idialer_phone"
         minSdkVersion 21
@@ -77,5 +81,7 @@ dependencies {
     implementation "com.google.accompanist:accompanist-permissions:0.17.0"
 
     implementation "androidx.room:room-runtime:$room_version"
+    kapt "androidx.room:room-compiler:$room_version"
     annotationProcessor "androidx.room:room-compiler:$room_version"
+    implementation "androidx.room:room-ktx:$room_version"
 }

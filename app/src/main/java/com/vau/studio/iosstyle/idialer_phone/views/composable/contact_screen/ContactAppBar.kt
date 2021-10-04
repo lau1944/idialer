@@ -16,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vau.studio.iosstyle.idialer_phone.R
+import com.vau.studio.iosstyle.idialer_phone.views.composable.appColor
 import com.vau.studio.iosstyle.idialer_phone.views.composable.components.AssetImage
 import com.vau.studio.iosstyle.idialer_phone.views.composable.components.SearchBar
 import com.vau.studio.iosstyle.idialer_phone.views.composable.iosBlue
@@ -32,7 +33,7 @@ fun ContactAppBar(
     ) {
 
         TopAppBar(
-            backgroundColor = iosWhite,
+            backgroundColor = appColor().background,
             elevation = 0.dp,
             contentPadding = PaddingValues(horizontal = 15.dp),
         ) {

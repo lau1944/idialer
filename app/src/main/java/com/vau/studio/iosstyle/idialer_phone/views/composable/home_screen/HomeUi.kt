@@ -23,10 +23,12 @@ import com.vau.studio.iosstyle.idialer_phone.data.CONTACT_READ_PERMISSION
 import com.vau.studio.iosstyle.idialer_phone.data.CONTACT_WRITE_PERMISSION
 import com.vau.studio.iosstyle.idialer_phone.data.DEFAULT_SCREEN_NAME
 import com.vau.studio.iosstyle.idialer_phone.views.composable.contact_screen.ContactUi
+import com.vau.studio.iosstyle.idialer_phone.views.composable.favorite_screen.FavoriteScreen
 import com.vau.studio.iosstyle.idialer_phone.views.composable.keypad_screen.DialerScreen
 import com.vau.studio.iosstyle.idialer_phone.views.composable.recent_screen.RecentUi
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.CallViewModel
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.ContactViewModel
+import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.FavoriteViewModel
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.MainViewModel
 
 @ExperimentalFoundationApi
@@ -36,7 +38,8 @@ import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.MainViewModel
 fun HomeScreen(
     mainViewModel: MainViewModel = viewModel(),
     contactViewModel: ContactViewModel,
-    callViewModel: CallViewModel
+    callViewModel: CallViewModel,
+    favoriteViewModel: FavoriteViewModel
 ) {
     val navController = rememberNavController()
     val currentScreen: String by mainViewModel.navScreen.observeAsState(DEFAULT_SCREEN_NAME)
@@ -57,7 +60,8 @@ fun HomeScreen(
             padding = padding,
             startRoute = currentScreen,
             contactViewModel = contactViewModel,
-            callViewModel = callViewModel
+            callViewModel = callViewModel,
+            favoriteViewModel = favoriteViewModel
         )
     }
 }
@@ -71,14 +75,15 @@ fun ScreenContent(
     padding: PaddingValues,
     startRoute: String,
     contactViewModel: ContactViewModel,
-    callViewModel: CallViewModel
+    callViewModel: CallViewModel,
+    favoriteViewModel: FavoriteViewModel
 ) {
     NavHost(
         navController = navController,
         startDestination = startRoute,
         Modifier.padding(padding)
     ) {
-        composable(HomeScreen.FavoriteScreen.route) { Text("hello") }
+        composable(HomeScreen.FavoriteScreen.route) { FavoriteScreen(favoriteViewModel = favoriteViewModel) }
         composable(HomeScreen.RecentScreen.route) { RecentUi(callViewModel = callViewModel) }
         composable(HomeScreen.ContactScreen.route) {
             ContactUi(

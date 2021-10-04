@@ -43,7 +43,7 @@ class FavoriteViewModel @Inject constructor(
 
     fun updateFavorite(contact: Contact) = viewModelScope.launch {
         val operandNumber = favoriteRepository.updateFavorite(contact = contact)
-        if (DbUtils.isSuccess(operandNumber)) {
+        if (DbUtils.isSuccess(operandNumber.toInt())) {
             val contacts = (_contactListState.value as UiState.Success).data
             val newContacts = mutableListOf<Contact>().apply {
                 addAll(contacts!!)
@@ -62,7 +62,7 @@ class FavoriteViewModel @Inject constructor(
     fun addToFavorite(contact: Contact) = viewModelScope.launch {
         if (_contactListState.value is UiState.Success) {
             val operandNumber = favoriteRepository.addToFavorite(contact = contact)
-            if (DbUtils.isSuccess(operandNumber)) {
+            if (DbUtils.isSuccess(operandNumber.toInt())) {
                 val contacts = (_contactListState.value as UiState.Success).data
                 val newContacts: List<Contact> = mutableListOf<Contact>().apply {
                     add(contact)
@@ -74,20 +74,18 @@ class FavoriteViewModel @Inject constructor(
     }
 
     fun deleteFavorite(contact: Contact) = viewModelScope.launch {
-        val operandNumber = favoriteRepository.deleteFavorite(contact)
-        if (DbUtils.isSuccess(operandNumber)) {
-            val contacts = (_contactListState.value as UiState.Success).data
-            val newContacts: List<Contact> = mutableListOf<Contact>().apply {
-                addAll(contacts!!)
-                remove(contact)
-            }
-            _contactListState.value = UiState.Success(newContacts)
+        favoriteRepository.deleteFavorite(contact)
+        val contacts = (_contactListState.value as UiState.Success).data
+        val newContacts: List<Contact> = mutableListOf<Contact>().apply {
+            addAll(contacts!!)
+            remove(contact)
         }
+        _contactListState.value = UiState.Success(newContacts)
     }
 
     fun deleteAll() = viewModelScope.launch {
         val operandNumber = favoriteRepository.deleteAllFavorite()
-        if (DbUtils.isSuccess(operandNumber = 0)) {
+        if (DbUtils.isSuccess(operandNumber = operandNumber)) {
             _contactListState.value = UiState.Success(mutableListOf())
         }
     }
