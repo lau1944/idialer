@@ -1,5 +1,6 @@
 package com.vau.studio.iosstyle.idialer_phone.views.composable.favorite_screen
 
+import androidx.compose.foundation.clickable
 import com.vau.studio.iosstyle.idialer_phone.R
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
@@ -7,7 +8,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -18,25 +18,26 @@ import com.vau.studio.iosstyle.idialer_phone.views.composable.appColor
 import com.vau.studio.iosstyle.idialer_phone.views.composable.components.AssetImage
 
 @Composable
-fun FavoriteItem(contact: Contact) {
+fun FavoriteItem(contact: Contact, onClick: (() -> Unit)? = null) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(65.dp)
             .padding(horizontal = 8.dp, vertical = 13.dp)
-    ) {
-        Row() {
-            GlideImage(imageModel = contact.phoneUrl ?: "", contentScale = ContentScale.Crop)
-            UserContentView(contact = contact) {
-
+            .clickable {
+                onClick?.invoke()
             }
+    ) {
+        Row {
+            GlideImage(imageModel = contact.phoneUrl ?: "", contentScale = ContentScale.Crop)
+            UserContentView(contact = contact)
             AssetImage(res = R.drawable.ic_info, size = 20)
         }
     }
 }
 
 @Composable
-private fun UserContentView(contact: Contact, onClick: () -> Unit) {
+private fun UserContentView(contact: Contact) {
     Column(
         horizontalAlignment = Alignment.Start,
         modifier = Modifier

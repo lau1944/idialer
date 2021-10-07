@@ -131,22 +131,7 @@ private fun ContactList(contactNames: List<Contact>, scrollState: LazyListState)
                 }
 
                 items(contactsInitial) { contact ->
-                    Box(
-                        modifier = Modifier
-                            .padding(vertical = 6.dp, horizontal = 10.dp)
-                            .fillMaxWidth()
-                    ) {
-                        Column(
-                            horizontalAlignment = Alignment.Start
-                        ) {
-                            Text(
-                                contact.name ?: "",
-                                style = TextStyle(color = appColor().surface, fontSize = 16.sp),
-                                modifier = Modifier.padding(vertical = 10.dp)
-                            )
-                            Divider(color = Color.LightGray.copy(alpha = 0.5f), thickness = 0.5.dp)
-                        }
-                    }
+                    ContactItem(contact.name)
                 }
             }
         },

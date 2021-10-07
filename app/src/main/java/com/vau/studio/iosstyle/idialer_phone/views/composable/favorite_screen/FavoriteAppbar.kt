@@ -1,5 +1,6 @@
 package com.vau.studio.iosstyle.idialer_phone.views.composable.favorite_screen
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
@@ -16,7 +17,8 @@ import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.FavoriteViewModel
 
 @Composable
 fun FavoriteAppbar(
-    favoriteViewModel: FavoriteViewModel
+    favoriteViewModel: FavoriteViewModel,
+    onAdded: () -> Unit
 ) {
     TopAppBar(
         backgroundColor = appColor().background,
@@ -24,7 +26,13 @@ fun FavoriteAppbar(
         contentPadding = PaddingValues(13.dp),
     ) {
         Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-            AssetImage(res = R.drawable.ic_add, size = 25)
+            AssetImage(
+                res = R.drawable.ic_add,
+                color = iosBlue,
+                size = 25,
+                modifier = Modifier.clickable {
+                    onAdded.invoke()
+                })
             Text(
                 text = "Favorites",
                 style = TextStyle(color = appColor().surface, fontSize = 16.sp)

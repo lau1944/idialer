@@ -17,10 +17,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.MultiplePermissionsState
-import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import com.vau.studio.iosstyle.idialer_phone.data.CONTACT_READ_PERMISSION
-import com.vau.studio.iosstyle.idialer_phone.data.CONTACT_WRITE_PERMISSION
 import com.vau.studio.iosstyle.idialer_phone.data.DEFAULT_SCREEN_NAME
 import com.vau.studio.iosstyle.idialer_phone.views.composable.contact_screen.ContactUi
 import com.vau.studio.iosstyle.idialer_phone.views.composable.favorite_screen.FavoriteScreen
@@ -83,7 +79,12 @@ fun ScreenContent(
         startDestination = startRoute,
         Modifier.padding(padding)
     ) {
-        composable(HomeScreen.FavoriteScreen.route) { FavoriteScreen(favoriteViewModel = favoriteViewModel) }
+        composable(HomeScreen.FavoriteScreen.route) {
+            FavoriteScreen(
+                favoriteViewModel = favoriteViewModel,
+                contactViewModel = contactViewModel
+            )
+        }
         composable(HomeScreen.RecentScreen.route) { RecentUi(callViewModel = callViewModel) }
         composable(HomeScreen.ContactScreen.route) {
             ContactUi(

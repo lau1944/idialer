@@ -26,7 +26,7 @@ import com.vau.studio.iosstyle.idialer_phone.views.composable.iosGray
 @Composable
 fun SearchBar(
     text: String? = null,
-    hintText: String? = null,
+    hintText: String? = "Search",
     onChanged: (String?) -> Unit,
     onSearch: (String?) -> Unit
 ) {
