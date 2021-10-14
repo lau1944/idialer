@@ -31,7 +31,7 @@ class FavoriteViewModel @Inject constructor(
         getAllFavorites()
     }
 
-    fun getAllFavorites() = viewModelScope.launch {
+    private fun getAllFavorites() = viewModelScope.launch {
         favoriteRepository.getAllFavorite().flowOn(Dispatchers.Default)
             .catch { e ->
                 _contactListState.value = UiState.Failed(exception = e)
@@ -42,33 +42,37 @@ class FavoriteViewModel @Inject constructor(
     }
 
     fun updateFavorite(contact: Contact) = viewModelScope.launch {
-        val operandNumber = favoriteRepository.updateFavorite(contact = contact)
-        if (DbUtils.isSuccess(operandNumber.toInt())) {
-            val contacts = (_contactListState.value as UiState.Success).data
-            val newContacts = mutableListOf<Contact>().apply {
-                addAll(contacts!!)
-            }
+        val contacts = (_contactListState.value as UiState.Success).data
+        if (hasSameContact(contact.contactId, contacts!!)) {
+            val operandNumber = favoriteRepository.updateFavorite(contact = contact)
+            if (DbUtils.isSuccess(operandNumber)) {
+                val newContacts = mutableListOf<Contact>().apply {
+                    addAll(contacts)
+                }
 
-            // update following contact
-            val index = contacts!!.indexOfFirst { it.contactId == contact.contactId }
-            if (index != -1) {
-                newContacts[index] = contact
-            }
+                // update following contact
+                val index = contacts.indexOfFirst { it.contactId == contact.contactId }
+                if (index != -1) {
+                    newContacts[index] = contact
+                }
 
-            _contactListState.value = UiState.Success(newContacts)
+                _contactListState.value = UiState.Success(newContacts)
+            }
         }
     }
 
     fun addToFavorite(contact: Contact) = viewModelScope.launch {
         if (_contactListState.value is UiState.Success) {
-            val operandNumber = favoriteRepository.addToFavorite(contact = contact)
-            if (DbUtils.isSuccess(operandNumber.toInt())) {
-                val contacts = (_contactListState.value as UiState.Success).data
-                val newContacts: List<Contact> = mutableListOf<Contact>().apply {
-                    add(contact)
-                    addAll(contacts!!)
+            val contacts = (_contactListState.value as UiState.Success).data
+            if (!hasSameContact(contact.contactId, contacts!!)) {
+                val operandNumber = favoriteRepository.addToFavorite(contact = contact)
+                if (DbUtils.isSuccess(operandNumber.toInt())) {
+                    val newContacts: List<Contact> = mutableListOf<Contact>().apply {
+                        add(contact)
+                        addAll(1, contacts)
+                    }
+                    _contactListState.value = UiState.Success(newContacts)
                 }
-                _contactListState.value = UiState.Success(newContacts)
             }
         }
     }
@@ -76,17 +80,25 @@ class FavoriteViewModel @Inject constructor(
     fun deleteFavorite(contact: Contact) = viewModelScope.launch {
         favoriteRepository.deleteFavorite(contact)
         val contacts = (_contactListState.value as UiState.Success).data
-        val newContacts: List<Contact> = mutableListOf<Contact>().apply {
-            addAll(contacts!!)
-            remove(contact)
+        if (hasSameContact(contact.contactId, contacts!!)) {
+            val newContacts: List<Contact> = mutableListOf<Contact>().apply {
+                addAll(contacts)
+                remove(contact)
+            }
+            _contactListState.value = UiState.Success(newContacts)
         }
-        _contactListState.value = UiState.Success(newContacts)
     }
 
     fun deleteAll() = viewModelScope.launch {
         val operandNumber = favoriteRepository.deleteAllFavorite()
         if (DbUtils.isSuccess(operandNumber = operandNumber)) {
             _contactListState.value = UiState.Success(mutableListOf())
+        }
+    }
+
+    private fun hasSameContact(contactId: String, contacts: List<Contact>): Boolean {
+        return contacts.any {
+            it.contactId == contactId
         }
     }
 }
