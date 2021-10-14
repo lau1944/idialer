@@ -5,6 +5,7 @@ import androidx.compose.material.ButtonElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
+import com.vau.studio.iosstyle.idialer_phone.core.DeviceUtil
 
 @Composable
 fun noElevation() : ButtonElevation{
@@ -17,7 +18,7 @@ fun noElevation() : ButtonElevation{
 
 @Composable
 fun keyButtonSize() : Int {
-    return when (LocalConfiguration.current.screenWidthDp) {
+    return when (DeviceUtil.info?.width) {
         in 0..599 -> 90
         in 600..904 -> 120
         else -> 140
