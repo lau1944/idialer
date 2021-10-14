@@ -1,5 +1,6 @@
 package com.vau.studio.iosstyle.idialer_phone.views.composable.contact_screen
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,11 +17,14 @@ import androidx.compose.ui.unit.sp
 import com.vau.studio.iosstyle.idialer_phone.views.composable.appColor
 
 @Composable
-fun ContactItem(name: String? = "") {
+fun ContactItem(name: String? = "", onTap: (() -> Unit)? = null) {
     Box(
         modifier = Modifier
             .padding(vertical = 6.dp, horizontal = 10.dp)
             .fillMaxWidth()
+            .clickable {
+                onTap?.invoke()
+            }
     ) {
         Column(
             horizontalAlignment = Alignment.Start

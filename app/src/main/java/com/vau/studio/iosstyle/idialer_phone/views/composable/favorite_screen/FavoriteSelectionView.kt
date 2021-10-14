@@ -59,9 +59,11 @@ fun FavoriteSelectionView(
                     .padding(horizontal = 10.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(modifier = Modifier
-                    .weight(1f)
-                    .background(iosBlue))
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .background(iosBlue)
+                )
                 Text(
                     "Contacts",
                     style = TextStyle(
@@ -89,7 +91,9 @@ fun FavoriteSelectionView(
             ) {
 
             }
-            ContactsSelectionList(contactViewModel)
+            ContactsSelectionList(contactViewModel, onTap = {
+                onSelected.invoke(it)
+            })
         }
     }
 }
@@ -97,7 +101,10 @@ fun FavoriteSelectionView(
 @SuppressLint("PermissionLaunchedDuringComposition")
 @ExperimentalPermissionsApi
 @Composable
-private fun ContactsSelectionList(contactViewModel: ContactViewModel) {
+private fun ContactsSelectionList(
+    contactViewModel: ContactViewModel,
+    onTap: ((Contact) -> Unit)? = null
+) {
     val contactState by contactViewModel.contactListState.observeAsState()
     val contactPermissionsState = rememberMultiplePermissionsState(
         permissions = listOf(
@@ -117,7 +124,9 @@ private fun ContactsSelectionList(contactViewModel: ContactViewModel) {
                 content = {
                     items(contacts,
                         itemContent = { contact ->
-                            ContactItem(contact.name)
+                            ContactItem(contact.name, onTap = {
+                                onTap?.invoke(contact)
+                            })
                         })
                 })
         }

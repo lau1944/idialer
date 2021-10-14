@@ -36,6 +36,9 @@ fun FavoriteScreen(favoriteViewModel: FavoriteViewModel, contactViewModel: Conta
     if (isAddDialogShowed.value) {
         ShowDialog(contactViewModel, onDismiss = {
             isAddDialogShowed.value = false
+        }, onSelect = { contact ->
+            favoriteViewModel.addToFavorite(contact)
+            isAddDialogShowed.value = false
         })
     }
 
@@ -79,13 +82,14 @@ private fun FavoriteList(contacts: List<Contact>) {
 @Composable
 private fun ShowDialog(
     contactViewModel: ContactViewModel,
+    onSelect: (Contact) -> Unit,
     onDismiss: () -> Unit,
 ) {
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false),
     ) {
-        FavoriteSelectionView(onSelected = {}, contactViewModel = contactViewModel) {
+        FavoriteSelectionView(onSelected = onSelect, contactViewModel = contactViewModel) {
             onDismiss()
         }
     }
