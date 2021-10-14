@@ -7,7 +7,9 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -16,22 +18,29 @@ import com.skydoves.landscapist.glide.GlideImage
 import com.vau.studio.iosstyle.idialer_phone.data.models.Contact
 import com.vau.studio.iosstyle.idialer_phone.views.composable.appColor
 import com.vau.studio.iosstyle.idialer_phone.views.composable.components.AssetImage
+import com.vau.studio.iosstyle.idialer_phone.views.composable.components.NetworkImage
+import com.vau.studio.iosstyle.idialer_phone.views.composable.iosGray
 
 @Composable
 fun FavoriteItem(contact: Contact, onClick: (() -> Unit)? = null) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(65.dp)
-            .padding(horizontal = 8.dp, vertical = 13.dp)
+            .padding(10.dp)
+            .height(75.dp)
             .clickable {
                 onClick?.invoke()
             }
+            .padding(horizontal = 8.dp, vertical = 13.dp)
     ) {
         Row {
-            GlideImage(imageModel = contact.phoneUrl ?: "", contentScale = ContentScale.Crop)
+            NetworkImage(
+                imageUrl = contact.phoneUrl ?: "",
+                modifier = Modifier.size(35.dp),
+                placeholder = ImageBitmap.imageResource(id = R.drawable.ic_user)
+            )
             UserContentView(contact = contact)
-            AssetImage(res = R.drawable.ic_info, size = 20)
+            AssetImage(res = R.drawable.ic_info, size = 20, color = iosGray.copy(alpha = 0.5f))
         }
     }
 }
@@ -52,8 +61,14 @@ private fun UserContentView(contact: Contact) {
                 fontSize = 16.sp
             )
         )
-        Row {
-            AssetImage(res = R.drawable.ic_message, size = 15)
+        Row(
+            modifier = Modifier.padding(vertical = 5.dp)
+        ) {
+            AssetImage(
+                res = R.drawable.ic_message,
+                size = 15,
+                modifier = Modifier.padding(end = 5.dp)
+            )
             Text(
                 text = "Messages",
                 style = TextStyle(
