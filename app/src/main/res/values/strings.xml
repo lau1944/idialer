@@ -5,4 +5,5 @@
     <string name="contacts">Contacts</string>
     <string name="Keypad">Keypad</string>
     <string name="voicemail">Voicemail</string>
+    <string name="setting">Setting</string>
 </resources>

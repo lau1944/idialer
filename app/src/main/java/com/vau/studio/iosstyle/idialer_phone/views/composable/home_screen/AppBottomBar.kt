@@ -63,7 +63,7 @@ enum class HomeScreen(
     RecentScreen("recent", R.string.recents, R.drawable.ic_clock),
     ContactScreen("contact", R.string.contacts, R.drawable.ic_user),
     KeypadScreen("keypad", R.string.Keypad, R.drawable.ic_keypad),
-    VoiceMailScreen("voice_mail", R.string.voicemail, R.drawable.ic_voicemail);
+    SettingScreen("setting", R.string.setting, R.drawable.ic_setting);
 
     companion object {
         @JvmStatic
@@ -73,7 +73,7 @@ enum class HomeScreen(
                 RecentScreen,
                 ContactScreen,
                 KeypadScreen,
-                VoiceMailScreen
+                SettingScreen
             )
         }
 
@@ -84,7 +84,7 @@ enum class HomeScreen(
                 "recent" -> return RecentScreen
                 "contact" -> return ContactScreen
                 "keypad" -> return KeypadScreen
-                "voice_mail" -> return VoiceMailScreen
+                "setting" -> return SettingScreen
             }
             throw AssertionError("Please pass a proper screen name")
         }

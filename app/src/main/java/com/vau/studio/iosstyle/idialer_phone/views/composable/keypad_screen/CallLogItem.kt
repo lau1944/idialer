@@ -64,7 +64,7 @@ fun CallLogItem(
 
             SwipeableCard(
                 maxCancelAreaWidth = maxCancelAreaWidth,
-                onDrag = { amount ->
+                onDrag = { _ ->
                     onDrag?.invoke(callHistory)
                 },
                 endContent = {

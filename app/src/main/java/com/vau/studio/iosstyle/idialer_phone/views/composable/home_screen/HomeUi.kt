@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -27,6 +28,7 @@ import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.ContactViewModel
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.FavoriteViewModel
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.MainViewModel
 
+@ExperimentalComposeUiApi
 @ExperimentalFoundationApi
 @ExperimentalMaterialApi
 @ExperimentalPermissionsApi
@@ -62,6 +64,7 @@ fun HomeScreen(
     }
 }
 
+@ExperimentalComposeUiApi
 @ExperimentalFoundationApi
 @ExperimentalMaterialApi
 @ExperimentalPermissionsApi
@@ -92,6 +95,6 @@ fun ScreenContent(
             )
         }
         composable(HomeScreen.KeypadScreen.route) { DialerScreen() }
-        composable(HomeScreen.VoiceMailScreen.route) { Text("hello") }
+        composable(HomeScreen.SettingScreen.route) { Text("hello") }
     }
 }
