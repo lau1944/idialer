@@ -26,20 +26,24 @@ import com.vau.studio.iosstyle.idialer_phone.data.CALL_LOG_READ_PERMISSION
 import com.vau.studio.iosstyle.idialer_phone.data.CALL_LOG_WRITE_PERMISSION
 import com.vau.studio.iosstyle.idialer_phone.data.MISSED_CALL_TYPE
 import com.vau.studio.iosstyle.idialer_phone.data.models.CallHistory
+import com.vau.studio.iosstyle.idialer_phone.data.models.Contact
 import com.vau.studio.iosstyle.idialer_phone.data.models.UiState
 import com.vau.studio.iosstyle.idialer_phone.views.composable.appColor
 import com.vau.studio.iosstyle.idialer_phone.views.composable.components.DeniedLayout
 import com.vau.studio.iosstyle.idialer_phone.views.composable.components.SelectionDialog
 import com.vau.studio.iosstyle.idialer_phone.views.composable.components.SelectionOption
 import com.vau.studio.iosstyle.idialer_phone.views.composable.components.UiProgressLayout
+import com.vau.studio.iosstyle.idialer_phone.views.composable.contact_detail_screen.CONTACT_DETAIL_ROUTE
 import com.vau.studio.iosstyle.idialer_phone.views.composable.keypad_screen.CallLogItem
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.CallViewModel
+import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.MainViewModel
 
 @ExperimentalMaterialApi
 @ExperimentalPermissionsApi
 @Composable
 fun RecentUi(
-    callViewModel: CallViewModel
+    callViewModel: CallViewModel,
+    mainViewModel: MainViewModel
 ) {
     val callLogState by callViewModel.callLogState.observeAsState()
     val onEdit by callViewModel.isEditState.observeAsState(false)
@@ -102,7 +106,16 @@ fun RecentUi(
                     CallList(
                         histories = callLogs!!,
                         callViewModel = callViewModel,
-                        onEdit = onEdit
+                        onEdit = onEdit,
+                        onTap = { num ->
+                            mainViewModel.navigateTo(
+                                route = CONTACT_DETAIL_ROUTE,
+                                args = mapOf(
+                                    "number" to num,
+                                    "prevName" to "Recents"
+                                )
+                            )
+                        }
                     )
                 }
             }
@@ -137,7 +150,12 @@ fun RecentUi(
 
 @ExperimentalMaterialApi
 @Composable
-private fun CallList(histories: List<CallHistory>, callViewModel: CallViewModel, onEdit: Boolean) {
+private fun CallList(
+    histories: List<CallHistory>,
+    callViewModel: CallViewModel,
+    onEdit: Boolean,
+    onTap: ((String) -> Unit)? = null
+) {
     val onEditItemIndex by callViewModel.cancelStateIndex.observeAsState()
 
     if (histories.isEmpty()) {
@@ -165,6 +183,8 @@ private fun CallList(histories: List<CallHistory>, callViewModel: CallViewModel,
                             isOnDeleteMode = onEditItemIndex == callLogIndex,
                             onTap = {
                                 callViewModel.changeCancelState()
+
+                                onTap?.invoke(it.number ?: "")
                             },
                             onDrag = {
                                 callViewModel.changeCancelState(histories.indexOf(it))

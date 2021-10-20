@@ -8,28 +8,60 @@ import com.vau.studio.iosstyle.idialer_phone.data.LIGHT_THEME
 import com.vau.studio.iosstyle.idialer_phone.data.NAV_SCREEN_KEY
 import com.vau.studio.iosstyle.idialer_phone.data.THEME_KEY
 import com.vau.studio.iosstyle.idialer_phone.data.local.SharePreferenceClient
+import com.vau.studio.iosstyle.idialer_phone.data.models.AppRoute
+import com.vau.studio.iosstyle.idialer_phone.views.composable.home_screen.HomeScreen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val sharePreClient: SharePreferenceClient
-): ViewModel() {
+) : ViewModel() {
 
-    private val _navScreen = MutableLiveData(DEFAULT_SCREEN_NAME)
-    val navScreen : LiveData<String> get() = _navScreen
+    private val _mainRoute = MutableLiveData(AppRoute(DEFAULT_SCREEN_NAME))
+    val mainRoute: LiveData<AppRoute> get() = _mainRoute
+
+    private val _secondRoute = MutableLiveData(arrayListOf<AppRoute>())
+    val secondRoute: MutableLiveData<ArrayList<AppRoute>> get() = _secondRoute
 
     private val _appTheme = MutableLiveData(LIGHT_THEME)
-    val appTheme : LiveData<Int> get() = _appTheme
+    val appTheme: LiveData<Int> get() = _appTheme
+
+    private val _popBack = MutableLiveData(false)
+    val popBack: LiveData<Boolean> get() = _popBack
 
     init {
         initNavScreen()
         initTheme()
     }
 
-    fun navigateTo(route: String) {
-        _navScreen.value = route
-        sharePreClient.setString(NAV_SCREEN_KEY, route)
+    fun navigateTo(route: String, args: Map<String, Any>? = null) {
+        if (HomeScreen.homeScreenRoutes.contains(route)) {
+            sharePreClient.setString(NAV_SCREEN_KEY, route)
+            _mainRoute.value = AppRoute(name = route, args = args)
+        } else {
+            val newRoute = arrayListOf<AppRoute>().apply {
+                addAll(_secondRoute.value!!)
+                add(AppRoute(name = route, args = args))
+            }
+            _secondRoute.value = newRoute
+        }
+    }
+
+    fun popBack() {
+        if (_secondRoute.value.isNullOrEmpty())
+            throw IllegalStateException("Only contains second route has the access to pop back route")
+
+        val newRoute = arrayListOf<AppRoute>().apply {
+            addAll(_secondRoute.value!!)
+            removeLastOrNull()
+        }
+        _secondRoute.value = newRoute
+        _popBack.value = true
+    }
+
+    fun popBackFinish() {
+        _popBack.value = false
     }
 
     private fun initTheme() {
@@ -38,7 +70,7 @@ class MainViewModel @Inject constructor(
 
     private fun initNavScreen() {
         val preScreen = sharePreClient.getString(NAV_SCREEN_KEY) ?: DEFAULT_SCREEN_NAME
-        _navScreen.value = preScreen
+        _mainRoute.value = AppRoute(preScreen)
     }
 
 }

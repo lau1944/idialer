@@ -66,6 +66,9 @@ enum class HomeScreen(
     SettingScreen("setting", R.string.setting, R.drawable.ic_setting);
 
     companion object {
+        @JvmField
+        val homeScreenRoutes = listOf<String>("favorite", "recent", "contact", "keypad", "setting")
+
         @JvmStatic
         fun screensList(): List<HomeScreen> {
             return listOf(
