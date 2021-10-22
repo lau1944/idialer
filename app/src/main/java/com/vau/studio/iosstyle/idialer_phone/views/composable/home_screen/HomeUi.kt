@@ -20,6 +20,7 @@ import com.vau.studio.iosstyle.idialer_phone.data.DEFAULT_SCREEN_NAME
 import com.vau.studio.iosstyle.idialer_phone.data.models.AppRoute
 import com.vau.studio.iosstyle.idialer_phone.views.composable.contact_detail_screen.CONTACT_DETAIL_ROUTE
 import com.vau.studio.iosstyle.idialer_phone.views.composable.contact_detail_screen.ContactDetailUi
+import com.vau.studio.iosstyle.idialer_phone.views.composable.contact_detail_screen.QUERY_PARAM_FIX
 import com.vau.studio.iosstyle.idialer_phone.views.composable.contact_screen.ContactUi
 import com.vau.studio.iosstyle.idialer_phone.views.composable.favorite_screen.FavoriteScreen
 import com.vau.studio.iosstyle.idialer_phone.views.composable.keypad_screen.DialerScreen
@@ -51,12 +52,13 @@ fun HomeScreen(
     val popBack: Boolean by mainViewModel.popBack.observeAsState(false)
 
     LaunchedEffect(mainScreen) {
-        navController.navigate(mainScreen.name)
+        navController.navigate(mainScreen.route)
     }
 
     LaunchedEffect(nextRoute) {
         if (nextRoute != null) {
-            navController.navigate(nextRoute.name)
+            println(nextRoute.parseRoute())
+            navController.navigate(nextRoute.parseRoute())
         }
     }
 
@@ -78,7 +80,6 @@ fun HomeScreen(
             navController = navController,
             padding = padding,
             startRoute = mainScreen,
-            secondRoute = nextRoute,
             contactViewModel = contactViewModel,
             callViewModel = callViewModel,
             favoriteViewModel = favoriteViewModel,
@@ -96,17 +97,14 @@ fun ScreenContent(
     navController: NavHostController,
     padding: PaddingValues,
     startRoute: AppRoute,
-    secondRoute: AppRoute?,
     contactViewModel: ContactViewModel,
     callViewModel: CallViewModel,
     favoriteViewModel: FavoriteViewModel,
     mainViewModel: MainViewModel
 ) {
-    val navArgs = mapToArgs(args = secondRoute?.args)
-
     NavHost(
         navController = navController,
-        startDestination = startRoute.name,
+        startDestination = startRoute.route,
         modifier = Modifier.padding(padding)
     ) {
         composable(HomeScreen.FavoriteScreen.route) {
@@ -129,7 +127,10 @@ fun ScreenContent(
         composable(HomeScreen.KeypadScreen.route) { DialerScreen() }
         composable(HomeScreen.SettingScreen.route) { Text("hello") }
         composable(
-            CONTACT_DETAIL_ROUTE, arguments = navArgs ?: listOf(),
+            CONTACT_DETAIL_ROUTE + QUERY_PARAM_FIX, arguments = listOf(
+                navArgument("number") { defaultValue = "" },
+                navArgument("prevName") { defaultValue = "" }
+            ),
         ) { entry ->
             ContactDetailUi(
                 number = entry.arguments?.getString("number"),
@@ -138,19 +139,4 @@ fun ScreenContent(
             )
         }
     }
-}
-
-@Composable
-private fun mapToArgs(args: Map<String, Any>?): List<NamedNavArgument>? {
-    if (args == null) return null
-
-    val navArgList = mutableListOf<NamedNavArgument>()
-    args.forEach { (key, value) ->
-        navArgList.add(
-            navArgument(key) {
-                defaultValue = value
-            }
-        )
-    }
-    return navArgList
 }

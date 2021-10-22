@@ -21,6 +21,7 @@ import com.vau.studio.iosstyle.idialer_phone.views.composable.iosGray
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.MainViewModel
 
 const val CONTACT_DETAIL_ROUTE = "contact_detail"
+const val QUERY_PARAM_FIX = "?number={number}&prevName={prevName}"
 
 @Composable
 fun ContactDetailUi(

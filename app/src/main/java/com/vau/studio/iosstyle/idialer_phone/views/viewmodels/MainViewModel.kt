@@ -38,11 +38,11 @@ class MainViewModel @Inject constructor(
     fun navigateTo(route: String, args: Map<String, Any>? = null) {
         if (HomeScreen.homeScreenRoutes.contains(route)) {
             sharePreClient.setString(NAV_SCREEN_KEY, route)
-            _mainRoute.value = AppRoute(name = route, args = args)
+            _mainRoute.value = AppRoute(route = route, args = args)
         } else {
             val newRoute = arrayListOf<AppRoute>().apply {
                 addAll(_secondRoute.value!!)
-                add(AppRoute(name = route, args = args))
+                add(AppRoute(route = route, args = args))
             }
             _secondRoute.value = newRoute
         }
