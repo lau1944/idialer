@@ -26,6 +26,7 @@ import com.vau.studio.iosstyle.idialer_phone.core.DateType
 import com.vau.studio.iosstyle.idialer_phone.core.DateUtil
 import com.vau.studio.iosstyle.idialer_phone.core.DeviceUtil
 import com.vau.studio.iosstyle.idialer_phone.data.models.CallHistory
+import com.vau.studio.iosstyle.idialer_phone.data.models.Contact
 import com.vau.studio.iosstyle.idialer_phone.views.composable.appColor
 import com.vau.studio.iosstyle.idialer_phone.views.composable.components.AssetImage
 import com.vau.studio.iosstyle.idialer_phone.views.composable.components.SwipeableCard
@@ -35,12 +36,12 @@ import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.CallViewModel
 @ExperimentalMaterialApi
 @Composable
 fun CallLogItem(
-    callHistory: CallHistory,
+    callHistory: Contact,
     isOnDeleteMode: Boolean? = false,
     onEdit: Boolean? = false,
-    onTap: ((CallHistory) -> Unit)? = null,
-    onDrag: ((CallHistory) -> Unit)? = null,
-    onDelete: ((CallHistory) -> Unit)? = null
+    onTap: ((Contact) -> Unit)? = null,
+    onDrag: ((Contact) -> Unit)? = null,
+    onDelete: ((Contact) -> Unit)? = null
 ) {
     val maxCancelAreaWidth = 95f
 
@@ -109,7 +110,7 @@ fun CallLogItem(
                         val textColor =
                             if (isMissedCall(callHistory.type!!)) Color.Red else appColor().surface
                         Text(
-                            callHistory.name ?: callHistory.number ?: "",
+                            callHistory.name ?: callHistory.number?.toString() ?: "",
                             style = TextStyle(color = textColor, fontSize = 18.sp),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
@@ -125,7 +126,7 @@ fun CallLogItem(
                         horizontalArrangement = Arrangement.End
                     ) {
                         Text(
-                            handleCallDate(callHistory.date),
+                            handleCallDate(callHistory.callDate),
                             style = TextStyle(color = Color.LightGray, fontSize = 15.sp),
                             modifier = Modifier.padding(horizontal = 4.dp)
                         )
@@ -139,7 +140,7 @@ fun CallLogItem(
 }
 
 @Composable
-private fun CancelArea(callHistory: CallHistory, onDelete: ((CallHistory) -> Unit)?) {
+private fun CancelArea(callHistory: Contact, onDelete: ((Contact) -> Unit)?) {
     Box(
         modifier = Modifier
             .background(Color.Red)
@@ -161,7 +162,7 @@ private fun CancelArea(callHistory: CallHistory, onDelete: ((CallHistory) -> Uni
 }
 
 @Composable
-private fun PhoneLocationLayout(callHistory: CallHistory) {
+private fun PhoneLocationLayout(callHistory: Contact) {
     Row {
         Text(
             "P",

@@ -151,7 +151,7 @@ fun RecentUi(
 @ExperimentalMaterialApi
 @Composable
 private fun CallList(
-    histories: List<CallHistory>,
+    histories: List<Contact>,
     callViewModel: CallViewModel,
     onEdit: Boolean,
     onTap: ((String) -> Unit)? = null
@@ -184,7 +184,7 @@ private fun CallList(
                             onTap = {
                                 callViewModel.changeCancelState()
 
-                                onTap?.invoke(it.number ?: "")
+                                onTap?.invoke(it.number?.toString() ?: "")
                             },
                             onDrag = {
                                 callViewModel.changeCancelState(histories.indexOf(it))
@@ -192,7 +192,7 @@ private fun CallList(
                             onEdit = onEdit,
                             onDelete = { callHistory ->
                                 callViewModel.changeCancelState()
-                                callViewModel.deleteHistory(callHistory = callHistory)
+                                callViewModel.deleteHistory(callLog = callHistory)
                             }
                         )
                     }

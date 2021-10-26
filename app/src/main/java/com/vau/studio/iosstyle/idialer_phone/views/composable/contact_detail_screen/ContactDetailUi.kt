@@ -54,7 +54,7 @@ private fun UserInfoView(contact: Contact) {
     ) {
         AssetImage(res = R.drawable.ic_big_user, size = 45)
         Text(
-            contact.name ?: contact.number ?: "Unknown",
+            contact.name ?: contact.number.toString() ?: "Unknown",
             style = TextStyle(color = appColor().surface, fontSize = 24.sp),
             modifier = Modifier.padding(vertical = 6.dp)
         )

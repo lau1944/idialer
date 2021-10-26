@@ -1,5 +1,6 @@
 package com.vau.studio.iosstyle.idialer_phone.views.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -34,6 +35,7 @@ class FavoriteViewModel @Inject constructor(
     private fun getAllFavorites() = viewModelScope.launch {
         favoriteRepository.getAllFavorite().flowOn(Dispatchers.Default)
             .catch { e ->
+                Log.i(TAG, e.toString())
                 _contactListState.value = UiState.Failed(exception = e)
             }
             .collect { contacts ->

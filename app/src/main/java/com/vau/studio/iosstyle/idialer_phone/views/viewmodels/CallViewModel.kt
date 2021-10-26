@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vau.studio.iosstyle.idialer_phone.data.ALL_CALL_TYPE
 import com.vau.studio.iosstyle.idialer_phone.data.models.CallHistory
+import com.vau.studio.iosstyle.idialer_phone.data.models.Contact
 import com.vau.studio.iosstyle.idialer_phone.data.models.UiState
 import com.vau.studio.iosstyle.idialer_phone.data.repositories.PhoneRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -28,9 +29,9 @@ class CallViewModel @Inject constructor(
     private val phoneRepository: PhoneRepository
 ) : ViewModel() {
 
-    private lateinit var callHistories: List<CallHistory>
-    private val _callLogState = MutableLiveData<UiState<List<CallHistory>>>(UiState.InProgress)
-    val callLogState: LiveData<UiState<List<CallHistory>>> get() = _callLogState
+    private lateinit var callHistories: List<Contact>
+    private val _callLogState = MutableLiveData<UiState<List<Contact>>>(UiState.InProgress)
+    val callLogState: LiveData<UiState<List<Contact>>> get() = _callLogState
 
     private val _callLogType = MutableLiveData(ALL_CALL_TYPE)
     val callLogType: LiveData<Int> get() = _callLogType
@@ -54,16 +55,16 @@ class CallViewModel @Inject constructor(
 
     /**
      * Delete item from call history list
-     * If [callHistory] pass as Null, we clear all the call logs by default
+     * If [callLog] pass as Null, we clear all the call logs by default
      */
-    fun deleteHistory(callHistory: CallHistory? = null)  {
+    fun deleteHistory(callLog: Contact? = null)  {
         if (_callLogState.value is UiState.Success) {
-            if (callHistory == null) {
-                (callHistories as ArrayList<CallHistory>).clear()
+            if (callLog == null) {
+                (callHistories as ArrayList<Contact>).clear()
             } else {
-                (callHistories as ArrayList<CallHistory>).remove(callHistory)
+                (callHistories as ArrayList<Contact>).remove(callLog)
             }
-            val temperList = mutableListOf<CallHistory>().apply {
+            val temperList = mutableListOf<Contact>().apply {
                 addAll(callHistories)
             }
             //phoneRepository.deleteCallLog(context, callHistory?.date)
@@ -117,7 +118,7 @@ class CallViewModel @Inject constructor(
                 return
             }
 
-            val tempCallLogs = mutableListOf<CallHistory>().apply {
+            val tempCallLogs = mutableListOf<Contact>().apply {
                 addAll(callHistories)
             }
             val queriedList = tempCallLogs.filter { call ->
