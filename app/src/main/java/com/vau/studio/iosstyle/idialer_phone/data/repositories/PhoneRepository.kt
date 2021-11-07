@@ -26,7 +26,7 @@ import java.lang.IllegalStateException
  */
 object PhoneRepository {
 
-    const val TAG: String = "PhoneRepository"
+    private const val TAG: String = "PhoneRepository"
 
     /**
      * Get all contacts
@@ -52,6 +52,7 @@ object PhoneRepository {
         )
         if (cursor != null) {
             val contacts = mutableListOf<Contact>()
+            val contactIdSet: HashSet<String> = hashSetOf()
 
             try {
                 while (cursor.moveToNext()) {
@@ -70,16 +71,20 @@ object PhoneRepository {
                     val postalIndex =
                         cursor.getColumnIndex(ContactsContract.CommonDataKinds.StructuredPostal.DATA)
 
-                    contacts.add(
-                        Contact(
-                            name = cursor.getString(nameIndex),
-                            email = cursor.getString(emailIndex),
-                            number = cursor.getString(numberIndex).toLongOrNull(),
-                            contactId = cursor.getString(idIndex),
-                            phoneUrl = cursor.getString(phoneUrlIndex),
-                            postal = cursor.getString(postalIndex)
+                    val id = cursor.getString(idIndex)
+                    if (!contactIdSet.contains(id)) {
+                        contactIdSet.add(id)
+                        contacts.add(
+                            Contact(
+                                name = cursor.getString(nameIndex),
+                                email = cursor.getString(emailIndex),
+                                number = cursor.getString(numberIndex).toLongOrNull(),
+                                contactId = id,
+                                phoneUrl = cursor.getString(phoneUrlIndex),
+                                postal = cursor.getString(postalIndex)
+                            )
                         )
-                    )
+                    }
                 }
                 emit(contacts)
             } catch (e: Exception) {

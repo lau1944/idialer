@@ -2,6 +2,7 @@ package com.vau.studio.iosstyle.idialer_phone.views.composable.contact_detail_sc
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -97,5 +98,9 @@ private fun UserInfoView(contact: Contact) {
  */
 @Composable
 private fun UserActionView(contact: Contact) {
+    Row(
 
+    ) {
+
+    }
 }

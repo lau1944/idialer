@@ -57,7 +57,7 @@ class CallViewModel @Inject constructor(
      * Delete item from call history list
      * If [callLog] pass as Null, we clear all the call logs by default
      */
-    fun deleteHistory(callLog: Contact? = null)  {
+    fun deleteHistory(callLog: Contact? = null) {
         if (_callLogState.value is UiState.Success) {
             if (callLog == null) {
                 (callHistories as ArrayList<Contact>).clear()
@@ -67,7 +67,6 @@ class CallViewModel @Inject constructor(
             val temperList = mutableListOf<Contact>().apply {
                 addAll(callHistories)
             }
-            //phoneRepository.deleteCallLog(context, callHistory?.date)
             _callLogState.value = UiState.Success(temperList)
         }
     }

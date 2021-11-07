@@ -39,19 +39,21 @@ class ContactViewModel @Inject constructor(
     @SuppressLint("Recycle")
     fun getContactNames(lookUp: String? = null) = viewModelScope.launch {
         _queriedContactState.value = UiState.InProgress
+
         phoneRepository.getContactNames(context, lookUp)
             .flowOn(Dispatchers.Default)
             .catch { e ->
                 _queriedContactState.value = UiState.Failed(e)
             }
             .collect { contacts ->
-            if (contacts != null) {
-                _contactList.value = contacts
-                _queriedContactState.value = UiState.Success(contacts)
-            } else {
-                _queriedContactState.value = UiState.Failed()
+                if (contacts != null) {
+                    println(contacts)
+                    _contactList.value = contacts
+                    _queriedContactState.value = UiState.Success(contacts)
+                } else {
+                    _queriedContactState.value = UiState.Failed()
+                }
             }
-        }
     }
 
     /**
