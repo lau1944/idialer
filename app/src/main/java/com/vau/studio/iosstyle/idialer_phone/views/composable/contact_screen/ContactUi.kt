@@ -33,14 +33,17 @@ import com.vau.studio.iosstyle.idialer_phone.data.models.UiState
 import com.vau.studio.iosstyle.idialer_phone.views.composable.appColor
 import com.vau.studio.iosstyle.idialer_phone.views.composable.components.DeniedLayout
 import com.vau.studio.iosstyle.idialer_phone.views.composable.components.UiProgressLayout
+import com.vau.studio.iosstyle.idialer_phone.views.composable.contact_detail_screen.CONTACT_DETAIL_ROUTE
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.ContactViewModel
+import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.MainViewModel
 import org.intellij.lang.annotations.JdkConstants
 
 @ExperimentalFoundationApi
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun ContactUi(
-    contactViewModel: ContactViewModel
+    contactViewModel: ContactViewModel,
+    mainViewModel: MainViewModel
 ) {
     val scrollState = rememberLazyListState()
     val contactPermissionsState = rememberMultiplePermissionsState(
@@ -81,7 +84,11 @@ fun ContactUi(
                                     Text("No Contact Info", style = TextStyle(color = Color.Black))
                                 }
                             } else {
-                                ContactList(contactNames = contacts, scrollState = scrollState)
+                                ContactList(
+                                    contactNames = contacts,
+                                    scrollState = scrollState,
+                                    mainViewModel = mainViewModel
+                                )
                             }
                         }
                     }
@@ -120,7 +127,11 @@ fun ContactUi(
 
 @ExperimentalFoundationApi
 @Composable
-private fun ContactList(contactNames: List<Contact>, scrollState: LazyListState) {
+private fun ContactList(
+    contactNames: List<Contact>,
+    scrollState: LazyListState,
+    mainViewModel: MainViewModel
+) {
     val groupedContacts = contactNames.groupBy { it.name?.first().toString() }
 
     LazyColumn(
@@ -131,7 +142,16 @@ private fun ContactList(contactNames: List<Contact>, scrollState: LazyListState)
                 }
 
                 items(contactsInitial) { contact ->
-                    ContactItem(contact.name)
+                    ContactItem(contact.name, onTap = {
+                        mainViewModel.navigateTo(
+                            route = CONTACT_DETAIL_ROUTE,
+                            args = mapOf(
+                                "id" to contact.contactId,
+                                "number" to contact.number.toString(),
+                                "prevName" to "Contact"
+                            )
+                        )
+                    })
                 }
             }
         },

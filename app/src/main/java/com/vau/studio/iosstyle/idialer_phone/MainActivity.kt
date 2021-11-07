@@ -19,10 +19,7 @@ import com.vau.studio.iosstyle.idialer_phone.data.CALL_LOG_READ_PERMISSION
 import com.vau.studio.iosstyle.idialer_phone.data.LIGHT_THEME
 import com.vau.studio.iosstyle.idialer_phone.views.composable.AppTheme
 import com.vau.studio.iosstyle.idialer_phone.views.composable.home_screen.HomeScreen
-import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.CallViewModel
-import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.ContactViewModel
-import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.FavoriteViewModel
-import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.MainViewModel
+import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.*
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -31,6 +28,7 @@ class MainActivity : ComponentActivity() {
     private val contactViewModel: ContactViewModel by viewModels()
     private val callViewModel: CallViewModel by viewModels()
     private val favoriteViewModel: FavoriteViewModel by viewModels()
+    private val contactDetailViewModel: ContactDetailViewModel by viewModels()
 
     @ExperimentalComposeUiApi
     @ExperimentalFoundationApi
@@ -54,7 +52,8 @@ class MainActivity : ComponentActivity() {
                     mainViewModel = mainViewModel,
                     contactViewModel = contactViewModel,
                     callViewModel = callViewModel,
-                    favoriteViewModel = favoriteViewModel
+                    favoriteViewModel = favoriteViewModel,
+                    contactDetailViewModel = contactDetailViewModel
                 )
             }
         }

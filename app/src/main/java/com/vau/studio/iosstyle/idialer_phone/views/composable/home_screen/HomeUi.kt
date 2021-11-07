@@ -25,10 +25,7 @@ import com.vau.studio.iosstyle.idialer_phone.views.composable.contact_screen.Con
 import com.vau.studio.iosstyle.idialer_phone.views.composable.favorite_screen.FavoriteScreen
 import com.vau.studio.iosstyle.idialer_phone.views.composable.keypad_screen.DialerScreen
 import com.vau.studio.iosstyle.idialer_phone.views.composable.recent_screen.RecentUi
-import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.CallViewModel
-import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.ContactViewModel
-import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.FavoriteViewModel
-import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.MainViewModel
+import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.*
 
 @ExperimentalComposeUiApi
 @ExperimentalFoundationApi
@@ -38,6 +35,7 @@ import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.MainViewModel
 fun HomeScreen(
     mainViewModel: MainViewModel = viewModel(),
     contactViewModel: ContactViewModel,
+    contactDetailViewModel: ContactDetailViewModel,
     callViewModel: CallViewModel,
     favoriteViewModel: FavoriteViewModel
 ) {
@@ -83,7 +81,8 @@ fun HomeScreen(
             contactViewModel = contactViewModel,
             callViewModel = callViewModel,
             favoriteViewModel = favoriteViewModel,
-            mainViewModel = mainViewModel
+            mainViewModel = mainViewModel,
+            contactDetailViewModel = contactDetailViewModel
         )
     }
 }
@@ -100,7 +99,8 @@ fun ScreenContent(
     contactViewModel: ContactViewModel,
     callViewModel: CallViewModel,
     favoriteViewModel: FavoriteViewModel,
-    mainViewModel: MainViewModel
+    mainViewModel: MainViewModel,
+    contactDetailViewModel: ContactDetailViewModel
 ) {
     NavHost(
         navController = navController,
@@ -121,21 +121,25 @@ fun ScreenContent(
         }
         composable(HomeScreen.ContactScreen.route) {
             ContactUi(
-                contactViewModel = contactViewModel
+                contactViewModel = contactViewModel,
+                mainViewModel = mainViewModel
             )
         }
         composable(HomeScreen.KeypadScreen.route) { DialerScreen() }
         composable(HomeScreen.SettingScreen.route) { Text("hello") }
         composable(
             CONTACT_DETAIL_ROUTE + QUERY_PARAM_FIX, arguments = listOf(
-                navArgument("number") { defaultValue = "" },
-                navArgument("prevName") { defaultValue = "" }
+                navArgument("number")   { defaultValue = "" },
+                navArgument("prevName") { defaultValue = "" },
+                navArgument("id")       { defaultValue = "" }
             ),
         ) { entry ->
             ContactDetailUi(
-                number = entry.arguments?.getString("number"),
+                number = entry.arguments?.getString("number") ?: "0",
                 preName = entry.arguments?.getString("prevName"),
-                mainViewModel = mainViewModel
+                id = entry.arguments?.getString("id"),
+                mainViewModel = mainViewModel,
+                contactViewModel = contactDetailViewModel
             )
         }
     }
