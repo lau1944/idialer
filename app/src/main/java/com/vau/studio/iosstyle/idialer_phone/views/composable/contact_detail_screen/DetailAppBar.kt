@@ -7,6 +7,7 @@ import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -16,9 +17,9 @@ import com.vau.studio.iosstyle.idialer_phone.views.composable.components.AssetIm
 import com.vau.studio.iosstyle.idialer_phone.views.composable.iosBlue
 
 @Composable
-fun DetailAppbar(prevName: String, onBack: () -> Unit) {
+fun DetailAppbar(prevName: String, backgroundColor: Color, onBack: () -> Unit) {
     TopAppBar(
-        backgroundColor = appColor().background,
+        backgroundColor = backgroundColor,
         elevation = 0.dp,
         contentPadding = PaddingValues(7.dp)
     ) {

@@ -45,6 +45,7 @@ val iosRed = Color(0xFFfc3d39)
 val iosBlack = Color(0xFF000000)
 val iosWhite = Color(0xFFFFFFFF)
 val iosGray = Color(0xFFEEEEEE)
+val backgroundGray = Color(0xFFFAFAFA)
 
 @Composable
 fun appColor() : Colors {
