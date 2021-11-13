@@ -55,7 +55,6 @@ fun HomeScreen(
 
     LaunchedEffect(nextRoute) {
         if (nextRoute != null) {
-            println(nextRoute.parseRoute())
             navController.navigate(nextRoute.parseRoute())
         }
     }
@@ -126,7 +125,7 @@ fun ScreenContent(
             )
         }
         composable(HomeScreen.KeypadScreen.route) { DialerScreen() }
-        composable(HomeScreen.SettingScreen.route) { Text("hello") }
+        composable(HomeScreen.SettingScreen.route) { Text("Setting") }
         composable(
             CONTACT_DETAIL_ROUTE + QUERY_PARAM_FIX, arguments = listOf(
                 navArgument("number")   { defaultValue = "" },
