@@ -1,5 +1,6 @@
 package com.vau.studio.iosstyle.idialer_phone.views.composable.contact_detail_screen
 
+import android.content.Intent
 import android.os.Build
 import android.telephony.emergency.EmergencyNumber
 import androidx.annotation.RequiresApi
@@ -11,22 +12,24 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Divider
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.vau.studio.iosstyle.idialer_phone.BuildConfig
 import com.vau.studio.iosstyle.idialer_phone.R
 import com.vau.studio.iosstyle.idialer_phone.core.DateUtil
+import com.vau.studio.iosstyle.idialer_phone.core.ShareHandler
 import com.vau.studio.iosstyle.idialer_phone.core.TimeUtils
 import com.vau.studio.iosstyle.idialer_phone.data.INCOMING_CALL_TYPE
 import com.vau.studio.iosstyle.idialer_phone.data.MISSED_CALL_TYPE
@@ -37,6 +40,7 @@ import com.vau.studio.iosstyle.idialer_phone.data.models.INCOMING_CALL
 import com.vau.studio.iosstyle.idialer_phone.data.models.UiState
 import com.vau.studio.iosstyle.idialer_phone.views.composable.*
 import com.vau.studio.iosstyle.idialer_phone.views.composable.components.AssetImage
+import com.vau.studio.iosstyle.idialer_phone.views.composable.components.ContactAddView
 import com.vau.studio.iosstyle.idialer_phone.views.composable.components.UiProgressLayout
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.ContactDetailViewModel
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.ContactViewModel
@@ -46,6 +50,7 @@ import java.util.*
 const val CONTACT_DETAIL_ROUTE = "contact_detail"
 const val QUERY_PARAM_FIX = "?number={number}&prevName={prevName}&id={id}"
 
+@ExperimentalComposeUiApi
 @Composable
 fun ContactDetailUi(
     preName: String? = "",
@@ -69,6 +74,18 @@ fun ContactDetailUi(
     ) {
         val contactDetailState by contactDetailViewModel.contactDetail.observeAsState()
         val isDefaultDialer by mainViewModel.isDefaultCaller.observeAsState(false)
+        val context = LocalContext.current
+        val showDialog = remember {
+            mutableStateOf(false)
+        }
+
+        if (showDialog.value) {
+            ShowContactCreateDialog(contact = Contact(number = number.toLongOrNull()), onDone = {
+
+            }, onDismiss = {
+                showDialog.value = false
+            })
+        }
 
         LaunchedEffect(true) {
             contactDetailViewModel.initState()
@@ -97,12 +114,33 @@ fun ContactDetailUi(
                             CallInfoView(contact = contact)
                         }
                     }
-                    ContactEditView(contact = contact, contactViewModel = contactViewModel)
+                    ContactEditView(
+                        contact = contact,
+                        contactViewModel = contactViewModel,
+                        onShare = {
+                            ShareHandler.shareText(context, contact.number.toString())
+                        },
+                        onCreate = {
+                            showDialog.value = true
+                        })
 
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isDefaultDialer)
                         BlockContactView(number = contact.number.toString(), contactViewModel)
                 }
             })
+        }
+    }
+}
+
+@ExperimentalComposeUiApi
+@Composable
+private fun ShowContactCreateDialog(contact: Contact, onDismiss: () -> Unit, onDone: () -> Unit) {
+    Dialog(
+        onDismissRequest = { onDismiss() },
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        ContactAddView(contact = contact, onCancel = { onDismiss() }) {
+            onDone()
         }
     }
 }
@@ -270,31 +308,54 @@ private fun BlockContactView(number: String, contactViewModel: ContactViewModel)
  * Contact edit
  */
 @Composable
-private fun ContactEditView(contact: Contact, contactViewModel: ContactViewModel) {
-    InfoViewHolder(modifier = Modifier.padding(vertical = 15.dp).fillMaxWidth()) {
+private fun ContactEditView(
+    contact: Contact,
+    contactViewModel: ContactViewModel,
+    onShare: () -> Unit,
+    onCreate: () -> Unit,
+) {
+    InfoViewHolder(
+        modifier = Modifier
+            .padding(vertical = 15.dp)
+            .fillMaxWidth()
+    ) {
         Column(
             horizontalAlignment = Alignment.Start,
         ) {
-            Text(
-                "Share Contact", style = TextStyle(
-                    color = iosBlue,
-                    fontSize = 16.sp
-                ),
-                modifier = Modifier.padding(15.dp)
-            )
-
-            if (!contactViewModel.existInContact(contact.number)) {
-                Divider(
-                    modifier = Modifier
-                        .background(iosGray.copy(alpha = 0.1f))
-                )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        onShare.invoke()
+                    }
+            ) {
                 Text(
-                    "Create New Contact", style = TextStyle(
+                    "Share Contact", style = TextStyle(
                         color = iosBlue,
                         fontSize = 16.sp
                     ),
                     modifier = Modifier.padding(15.dp)
                 )
+            }
+
+            if (!contactViewModel.existInContact(contact.number)) {
+                Box(modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        onCreate()
+                    }) {
+                    Divider(
+                        modifier = Modifier
+                            .background(iosGray.copy(alpha = 0.1f))
+                    )
+                    Text(
+                        "Create New Contact", style = TextStyle(
+                            color = iosBlue,
+                            fontSize = 16.sp
+                        ),
+                        modifier = Modifier.padding(15.dp)
+                    )
+                }
             }
         }
     }
