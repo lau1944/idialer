@@ -80,7 +80,7 @@ fun ContactDetailUi(
         }
 
         if (showDialog.value) {
-            ShowContactCreateDialog(contact = Contact(number = number.toLongOrNull()), onDone = {
+            ShowContactCreateDialog(contactDetailViewModel = contactDetailViewModel, onDone = {
 
             }, onDismiss = {
                 showDialog.value = false
@@ -134,12 +134,18 @@ fun ContactDetailUi(
 
 @ExperimentalComposeUiApi
 @Composable
-private fun ShowContactCreateDialog(contact: Contact, onDismiss: () -> Unit, onDone: () -> Unit) {
+private fun ShowContactCreateDialog(
+    contactDetailViewModel: ContactDetailViewModel,
+    onDismiss: () -> Unit,
+    onDone: () -> Unit
+) {
     Dialog(
         onDismissRequest = { onDismiss() },
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
-        ContactAddView(contact = contact, onCancel = { onDismiss() }) {
+        ContactAddView(
+            contactDetailViewModel = contactDetailViewModel,
+            onCancel = { onDismiss() }) {
             onDone()
         }
     }

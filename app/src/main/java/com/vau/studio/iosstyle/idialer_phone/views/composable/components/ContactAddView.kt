@@ -8,6 +8,8 @@ import androidx.compose.material.AlertDialog
 import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -19,9 +21,16 @@ import androidx.compose.ui.unit.sp
 import com.vau.studio.iosstyle.idialer_phone.R
 import com.vau.studio.iosstyle.idialer_phone.data.models.Contact
 import com.vau.studio.iosstyle.idialer_phone.views.composable.*
+import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.ContactDetailViewModel
 
 @Composable
-fun ContactAddView(contact: Contact, onCancel: () -> Unit, onDone: () -> Unit) {
+fun ContactAddView(
+    contactDetailViewModel: ContactDetailViewModel,
+    onCancel: () -> Unit,
+    onDone: () -> Unit
+) {
+    val contact by contactDetailViewModel.newContact.observeAsState()
+
     Box(
         Modifier
             .background(backgroundGray)
@@ -31,18 +40,17 @@ fun ContactAddView(contact: Contact, onCancel: () -> Unit, onDone: () -> Unit) {
             verticalArrangement = Arrangement.Top
         ) {
             ContactHeaderView(onCancel, onDone)
-            ContactEditList(contact = contact)
-
+            ContactEditList(contact = contact!!, contactDetailViewModel)
         }
     }
 }
 
 @Composable
-private fun ContactEditList(contact: Contact) {
+private fun ContactEditList(contact: Contact, contactDetailViewModel: ContactDetailViewModel) {
     LazyColumn(content = {
         item {
             ContactEditAvatar()
-            TextInfoSection()
+            TextInfoSection(contact, contactDetailViewModel)
 
             // phone field
             if (contact.number != null) {
@@ -69,10 +77,13 @@ private fun ContactEditList(contact: Contact) {
 }
 
 @Composable
-private fun TextInfoSection() {
+private fun TextInfoSection(contact: Contact, contactDetailViewModel: ContactDetailViewModel) {
     Column(modifier = Modifier.padding(vertical = 15.dp)) {
         EditView {
-            StandardEditText(hint = "Name")
+            StandardEditText(value = contact.name ?: "", hint = "Name", onChange = { text ->
+                val newContact = contact.copy(name = text)
+                contactDetailViewModel.updateContact(contact = newContact)
+            })
         }
     }
 }
@@ -80,7 +91,10 @@ private fun TextInfoSection() {
 @Composable
 private fun ContactEditAvatar() {
     Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
-        Column(verticalArrangement = Arrangement.Center) {
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             AssetImage(
                 res = R.drawable.ic_big_user,
                 size = 75,
@@ -112,13 +126,18 @@ private fun InfoRemoveView(hint: String, content: String, onRemove: (() -> Unit)
                 size = 20,
                 modifier = Modifier.padding(horizontal = 12.dp)
             )
-            Row() {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(
                     hint,
                     style = TextStyle(fontSize = 16.sp),
                     modifier = Modifier.padding(end = 10.dp)
                 )
-                Text(content, style = TextStyle(fontSize = 16.sp, color = iosBlue))
+                Text(
+                    content,
+                    style = TextStyle(fontSize = 16.sp, color = iosBlue)
+                )
             }
         }
     }
@@ -169,18 +188,24 @@ private fun ContactHeaderView(onDismiss: () -> Unit, onDone: () -> Unit) {
                 Text(
                     "Discard Changes",
                     style = TextStyle(color = iosRed, fontSize = 16.sp),
-                    modifier = Modifier.clickable {
-                        showAlertDialog.value = false
-                        onDismiss()
-                    }.padding(horizontal = 5.dp))
+                    modifier = Modifier
+                        .clickable {
+                            showAlertDialog.value = false
+                            onDismiss()
+                        }
+                        .padding(horizontal = 5.dp)
+                )
             },
             dismissButton = {
                 Text(
                     "Keep Editing",
                     style = TextStyle(color = iosBlue, fontSize = 16.sp),
-                    modifier = Modifier.clickable {
-                        showAlertDialog.value = false
-                    }.padding(horizontal = 5.dp))
+                    modifier = Modifier
+                        .clickable {
+                            showAlertDialog.value = false
+                        }
+                        .padding(horizontal = 5.dp)
+                )
             },
             backgroundColor = appColor().background
         )

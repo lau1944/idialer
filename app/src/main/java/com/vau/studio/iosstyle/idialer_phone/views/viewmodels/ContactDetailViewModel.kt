@@ -32,8 +32,15 @@ class ContactDetailViewModel @Inject constructor(
     private val _contactDetail = MutableLiveData<UiState<Contact>>()
     val contactDetail: LiveData<UiState<Contact>> get() = _contactDetail
 
+    private val _newContact = MutableLiveData<Contact>(Contact())
+    val newContact: LiveData<Contact> get() = _newContact
+
     init {
         initState()
+    }
+
+    fun updateContact(contact: Contact) {
+        _newContact.value = contact
     }
 
     fun getContactDetailById(id: String) = viewModelScope.launch {
@@ -42,6 +49,7 @@ class ContactDetailViewModel @Inject constructor(
             .collect { contacts ->
                 if (!contacts.isNullOrEmpty()) {
                     _contactDetail.value = UiState.Success(contacts.first())
+                    updateContact(contacts.first())
                 }
             }
     }
@@ -52,6 +60,7 @@ class ContactDetailViewModel @Inject constructor(
             .collect { contacts ->
                 if (!contacts.isNullOrEmpty()) {
                     _contactDetail.value = UiState.Success(contacts.first())
+                    updateContact(contacts.first())
                 }
             }
     }
@@ -62,6 +71,7 @@ class ContactDetailViewModel @Inject constructor(
             .collect { contacts ->
                 if (!contacts.isNullOrEmpty()) {
                     _contactDetail.value = UiState.Success(contacts.first())
+                    updateContact(contacts.first())
                 }
             }
     }
