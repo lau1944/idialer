@@ -138,7 +138,8 @@ fun ScreenContent(
                 preName = entry.arguments?.getString("prevName"),
                 id = entry.arguments?.getString("id"),
                 mainViewModel = mainViewModel,
-                contactViewModel = contactDetailViewModel
+                contactViewModel = contactViewModel,
+                contactDetailViewModel = contactDetailViewModel
             )
         }
     }

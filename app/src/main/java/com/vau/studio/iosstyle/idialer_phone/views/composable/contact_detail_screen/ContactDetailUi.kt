@@ -1,10 +1,14 @@
 package com.vau.studio.iosstyle.idialer_phone.views.composable.contact_detail_screen
 
+import android.os.Build
+import android.telephony.emergency.EmergencyNumber
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Divider
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -20,6 +24,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.vau.studio.iosstyle.idialer_phone.BuildConfig
 import com.vau.studio.iosstyle.idialer_phone.R
 import com.vau.studio.iosstyle.idialer_phone.core.DateUtil
 import com.vau.studio.iosstyle.idialer_phone.core.TimeUtils
@@ -30,13 +35,11 @@ import com.vau.studio.iosstyle.idialer_phone.data.models.Contact
 import com.vau.studio.iosstyle.idialer_phone.data.models.ContactPageType
 import com.vau.studio.iosstyle.idialer_phone.data.models.INCOMING_CALL
 import com.vau.studio.iosstyle.idialer_phone.data.models.UiState
-import com.vau.studio.iosstyle.idialer_phone.views.composable.appColor
-import com.vau.studio.iosstyle.idialer_phone.views.composable.backgroundGray
+import com.vau.studio.iosstyle.idialer_phone.views.composable.*
 import com.vau.studio.iosstyle.idialer_phone.views.composable.components.AssetImage
 import com.vau.studio.iosstyle.idialer_phone.views.composable.components.UiProgressLayout
-import com.vau.studio.iosstyle.idialer_phone.views.composable.iosBlue
-import com.vau.studio.iosstyle.idialer_phone.views.composable.iosGray
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.ContactDetailViewModel
+import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.ContactViewModel
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.MainViewModel
 import java.util.*
 
@@ -49,7 +52,8 @@ fun ContactDetailUi(
     number: String,
     id: String? = "",
     mainViewModel: MainViewModel,
-    contactViewModel: ContactDetailViewModel,
+    contactViewModel: ContactViewModel,
+    contactDetailViewModel: ContactDetailViewModel,
 ) {
     val backgroundColor = remember {
         backgroundGray
@@ -63,17 +67,18 @@ fun ContactDetailUi(
         },
         backgroundColor = backgroundColor
     ) {
-        val contactDetailState by contactViewModel.contactDetail.observeAsState()
+        val contactDetailState by contactDetailViewModel.contactDetail.observeAsState()
+        val isDefaultDialer by mainViewModel.isDefaultCaller.observeAsState(false)
 
         LaunchedEffect(true) {
-            contactViewModel.initState()
+            contactDetailViewModel.initState()
 
             val page = ContactPageType.map(preName)
             if (page == ContactPageType.Recent) {
-                contactViewModel.getCallLogByNumber(number)
+                contactDetailViewModel.getCallLogByNumber(number)
             }
             if (page == ContactPageType.Contact) {
-                contactViewModel.getContactDetailById(id!!)
+                contactDetailViewModel.getContactDetailById(id!!)
             }
         }
 
@@ -92,6 +97,10 @@ fun ContactDetailUi(
                             CallInfoView(contact = contact)
                         }
                     }
+                    ContactEditView(contact = contact, contactViewModel = contactViewModel)
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isDefaultDialer)
+                        BlockContactView(number = contact.number.toString(), contactViewModel)
                 }
             })
         }
@@ -148,7 +157,7 @@ private fun UserActionView(contact: Contact) {
 @Composable
 private fun CallInfoView(contact: Contact) {
     val callDate = remember {
-        Date(contact.callDate!!.toLong())
+        if (contact.callDate.isNullOrBlank()) null else Date(contact.callDate.toLong())
     }
 
     InfoViewHolder {
@@ -158,11 +167,13 @@ private fun CallInfoView(contact: Contact) {
                 .padding(12.dp)
                 .fillMaxWidth()
         ) {
-            Text(
-                DateUtil.parseToDateFormat(callDate),
-                style = TextStyle(fontSize = 16.sp),
-                modifier = Modifier.padding(vertical = 7.dp)
-            )
+            if (callDate != null) {
+                Text(
+                    DateUtil.parseToDateFormat(callDate),
+                    style = TextStyle(fontSize = 16.sp),
+                    modifier = Modifier.padding(vertical = 7.dp)
+                )
+            }
 
             Row(
                 verticalAlignment = Alignment.Top
@@ -173,7 +184,6 @@ private fun CallInfoView(contact: Contact) {
                 )
 
                 when (contact.type) {
-
                     MISSED_CALL_TYPE -> Text(
                         "Missed call",
                         style = TextStyle(color = appColor().surface, fontWeight = FontWeight.Bold)
@@ -228,6 +238,68 @@ private fun CallInfoView(contact: Contact) {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.N)
+@Composable
+private fun BlockContactView(number: String, contactViewModel: ContactViewModel) {
+    //val blockedNumbers by contactViewModel.blockNumbers.observeAsState()
+    val isInBlock = contactViewModel.isInBlock(number)
+
+    Box(modifier = Modifier.padding(vertical = 15.dp)) {
+        InfoViewHolder {
+            Text(
+                if (isInBlock) "Unblock this user" else "Block this Caller", style = TextStyle(
+                    color = iosRed,
+                    fontSize = 16.sp
+                ),
+                modifier = Modifier
+                    .padding(15.dp)
+                    .fillMaxWidth()
+                    .clickable {
+                        if (isInBlock) {
+                            contactViewModel.removeBlockNumber(number)
+                        } else {
+                            contactViewModel.addBlockNumber(number)
+                        }
+                    }
+            )
+        }
+    }
+}
+
+/**
+ * Contact edit
+ */
+@Composable
+private fun ContactEditView(contact: Contact, contactViewModel: ContactViewModel) {
+    InfoViewHolder(modifier = Modifier.padding(vertical = 15.dp).fillMaxWidth()) {
+        Column(
+            horizontalAlignment = Alignment.Start,
+        ) {
+            Text(
+                "Share Contact", style = TextStyle(
+                    color = iosBlue,
+                    fontSize = 16.sp
+                ),
+                modifier = Modifier.padding(15.dp)
+            )
+
+            if (!contactViewModel.existInContact(contact.number)) {
+                Divider(
+                    modifier = Modifier
+                        .background(iosGray.copy(alpha = 0.1f))
+                )
+                Text(
+                    "Create New Contact", style = TextStyle(
+                        color = iosBlue,
+                        fontSize = 16.sp
+                    ),
+                    modifier = Modifier.padding(15.dp)
+                )
+            }
+        }
+    }
+}
+
 @Composable
 private fun ActionViewBox(onTap: (() -> Unit)? = null, res: Int, text: String) {
     InfoViewHolder {
@@ -238,7 +310,7 @@ private fun ActionViewBox(onTap: (() -> Unit)? = null, res: Int, text: String) {
                 .clickable {
                     onTap?.invoke()
                 }
-                .padding(15.dp),
+                .padding(vertical = 15.dp),
             contentAlignment = Alignment.Center
         ) {
             Column(
@@ -252,12 +324,13 @@ private fun ActionViewBox(onTap: (() -> Unit)? = null, res: Int, text: String) {
 }
 
 @Composable
-private fun InfoViewHolder(content: @Composable () -> Unit) {
+private fun InfoViewHolder(modifier: Modifier? = Modifier, content: @Composable () -> Unit) {
     Box(
-        modifier = Modifier
+        modifier = modifier!!
             .clip(RoundedCornerShape(16.dp))
             .shadow(5.dp)
             .background(appColor().background)
+            .padding(horizontal = 10.dp)
     ) {
         content()
     }

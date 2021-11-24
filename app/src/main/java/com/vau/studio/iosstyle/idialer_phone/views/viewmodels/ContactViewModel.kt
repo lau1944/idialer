@@ -2,6 +2,8 @@ package com.vau.studio.iosstyle.idialer_phone.views.viewmodels
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -29,8 +31,15 @@ class ContactViewModel @Inject constructor(
     private val _contactList = MutableLiveData<List<Contact>>()
     val contactListState: LiveData<UiState<List<Contact>>> get() = _queriedContactState
 
+    private val _blockNumbers = MutableLiveData<List<String>>()
+    val blockNumbers: LiveData<List<String>> get() = _blockNumbers
+
     companion object {
         const val TAG: String = "ContactViewModel"
+    }
+
+    init {
+        getContactNames()
     }
 
     /**
@@ -47,7 +56,6 @@ class ContactViewModel @Inject constructor(
             }
             .collect { contacts ->
                 if (contacts != null) {
-                    println(contacts)
                     _contactList.value = contacts
                     _queriedContactState.value = UiState.Success(contacts)
                 } else {
@@ -72,5 +80,64 @@ class ContactViewModel @Inject constructor(
                 })
             }
         }
+    }
+
+    /**
+     * Check if contact exist in the list
+     */
+    fun existInContact(number: Long?): Boolean {
+        if (number == null) return false
+
+        val contacts = _contactList.value
+        return contacts?.any {
+            return it.number == number
+        } ?: false
+    }
+
+
+    /**
+     * Get all block number
+     */
+    fun getBlockNumbers() = viewModelScope.launch {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            phoneRepository.getBlockNumber(context)
+                .flowOn(Dispatchers.Main)
+                .collect { numbers ->
+                    _blockNumbers.value = numbers
+                }
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.N)
+    fun addBlockNumber(number: String) = viewModelScope.launch {
+        phoneRepository.addBlockNumber(context, number)
+        updateBlockList(number, true)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.N)
+    fun removeBlockNumber(number: String) = viewModelScope.launch {
+        phoneRepository.deleteBlockNumber(context, number)
+        updateBlockList(number, false)
+    }
+
+    fun isInBlock(number: String): Boolean {
+        val numbers = blockNumbers.value
+        return if (numbers.isNullOrEmpty()) false else numbers.contains(number)
+    }
+
+    private fun updateBlockList(number: String, isAdd: Boolean) {
+        val blocked = _blockNumbers.value
+        val newBlocked = arrayListOf<String>().apply {
+            if (blocked != null) {
+                addAll(blocked)
+
+                if (isAdd) {
+                    add(number)
+                } else if (blocked.contains(number)){
+                    this.remove(number)
+                }
+            }
+        }
+        _blockNumbers.value = newBlocked
     }
 }

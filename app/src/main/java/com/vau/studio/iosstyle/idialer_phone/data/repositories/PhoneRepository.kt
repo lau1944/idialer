@@ -2,9 +2,11 @@ package com.vau.studio.iosstyle.idialer_phone.data.repositories
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.ContentValues
 import android.content.Context
 import android.net.Uri
 import android.os.Build
+import android.provider.BlockedNumberContract
 import android.provider.CallLog
 import android.provider.ContactsContract
 import android.util.Log
@@ -165,5 +167,65 @@ object PhoneRepository {
             if (id != null) queryString else null,
             null
         )
+    }
+
+    /**
+     * Get all blocked number
+     */
+    @SuppressLint("Recycle")
+    @RequiresApi(Build.VERSION_CODES.N)
+    fun getBlockNumber(
+        @ApplicationContext context: Context
+    ): Flow<List<String>> = flow {
+        val cursor = context.contentResolver.query(
+            BlockedNumberContract.BlockedNumbers.CONTENT_URI,
+            arrayOf<String>(
+                BlockedNumberContract.BlockedNumbers.COLUMN_ORIGINAL_NUMBER,
+            ), null, null, null
+        )
+        try {
+            val numbers = arrayListOf<String>()
+            val numIndex =
+                cursor!!.getColumnIndex(BlockedNumberContract.BlockedNumbers.COLUMN_ORIGINAL_NUMBER)
+            while (cursor.moveToNext()) {
+                val number = cursor.getStringOrNull(numIndex)
+                if (number != null) numbers.add(number)
+            }
+            emit(numbers)
+        } catch (e: Exception) {
+            Log.i(TAG, e.toString())
+        } finally {
+            cursor?.close()
+        }
+    }.flowOn(Dispatchers.IO)
+
+    /**
+     * Add block number
+     */
+    @RequiresApi(Build.VERSION_CODES.N)
+    fun addBlockNumber(
+        @ApplicationContext context: Context,
+        number: String
+    ) {
+        val contentValue = ContentValues()
+        contentValue.put(BlockedNumberContract.BlockedNumbers.COLUMN_ORIGINAL_NUMBER, number)
+        context.contentResolver.insert(
+            BlockedNumberContract.BlockedNumbers.CONTENT_URI,
+            contentValue
+        )
+    }
+
+    @RequiresApi(Build.VERSION_CODES.N)
+    fun deleteBlockNumber(
+        @ApplicationContext context: Context,
+        number: String
+    ) {
+        val contentValue = ContentValues()
+        contentValue.put(BlockedNumberContract.BlockedNumbers.COLUMN_ORIGINAL_NUMBER, number)
+        val uri = context.contentResolver.insert(
+            BlockedNumberContract.BlockedNumbers.CONTENT_URI,
+            contentValue
+        )
+        context.contentResolver.delete(uri!!, null, null)
     }
 }

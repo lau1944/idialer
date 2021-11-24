@@ -1,8 +1,15 @@
 package com.vau.studio.iosstyle.idialer_phone.views.viewmodels
 
+import android.annotation.SuppressLint
+import android.content.Context
+import android.content.Context.TELECOM_SERVICE
+import android.os.Build
+import android.telecom.TelecomManager
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.vau.studio.iosstyle.idialer_phone.BuildConfig
 import com.vau.studio.iosstyle.idialer_phone.data.DEFAULT_SCREEN_NAME
 import com.vau.studio.iosstyle.idialer_phone.data.LIGHT_THEME
 import com.vau.studio.iosstyle.idialer_phone.data.NAV_SCREEN_KEY
@@ -11,10 +18,13 @@ import com.vau.studio.iosstyle.idialer_phone.data.local.SharePreferenceClient
 import com.vau.studio.iosstyle.idialer_phone.data.models.AppRoute
 import com.vau.studio.iosstyle.idialer_phone.views.composable.home_screen.HomeScreen
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
+@SuppressLint("StaticFieldLeak")
 @HiltViewModel
 class MainViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val sharePreClient: SharePreferenceClient
 ) : ViewModel() {
 
@@ -30,9 +40,13 @@ class MainViewModel @Inject constructor(
     private val _popBack = MutableLiveData(false)
     val popBack: LiveData<Boolean> get() = _popBack
 
+    private val _isDefaultCaller = MutableLiveData<Boolean>(false)
+    val isDefaultCaller : LiveData<Boolean> get() = _isDefaultCaller
+
     init {
         initNavScreen()
         initTheme()
+        checkIfDefaultCaller()
     }
 
     fun navigateTo(route: String, args: Map<String, Any>? = null) {
@@ -62,6 +76,13 @@ class MainViewModel @Inject constructor(
 
     fun popBackFinish() {
         _popBack.value = false
+    }
+
+    fun checkIfDefaultCaller() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return
+
+        val telManager = context.getSystemService(TELECOM_SERVICE) as TelecomManager
+        _isDefaultCaller.value = telManager.defaultDialerPackage == BuildConfig.APPLICATION_ID
     }
 
     private fun initTheme() {
