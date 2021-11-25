@@ -8,12 +8,18 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import com.vau.studio.iosstyle.idialer_phone.views.composable.appColor
 
+@ExperimentalComposeUiApi
 @Composable
 fun StandardEditText(
     value: String? = "",
@@ -23,6 +29,11 @@ fun StandardEditText(
     onChange: ((String) -> Unit)? = null,
     onDone: (() -> Unit)? = null
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusRequester = remember {
+        FocusRequester()
+    }
+
     TextField(
         value = value!!,
         onValueChange = { text ->
@@ -39,6 +50,7 @@ fun StandardEditText(
         keyboardActions = KeyboardActions(
             onDone = {
                 onDone?.invoke()
+                keyboardController?.hide()
             }
         ),
         singleLine = true,
@@ -47,5 +59,6 @@ fun StandardEditText(
         },
         modifier = Modifier
             .fillMaxWidth()
+            .focusRequester(focusRequester = focusRequester)
     )
 }

@@ -13,6 +13,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -20,9 +21,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vau.studio.iosstyle.idialer_phone.R
 import com.vau.studio.iosstyle.idialer_phone.data.models.Contact
+import com.vau.studio.iosstyle.idialer_phone.data.models.ContactInputType
 import com.vau.studio.iosstyle.idialer_phone.views.composable.*
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.ContactDetailViewModel
 
+@ExperimentalComposeUiApi
 @Composable
 fun ContactAddView(
     contactDetailViewModel: ContactDetailViewModel,
@@ -30,6 +33,13 @@ fun ContactAddView(
     onDone: () -> Unit
 ) {
     val contact by contactDetailViewModel.newContact.observeAsState()
+
+    val showInputDialog = remember {
+        mutableStateOf(false)
+    }
+    val contactInputType = remember {
+        mutableStateOf<ContactInputType?>(null)
+    }
 
     Box(
         Modifier
@@ -40,13 +50,47 @@ fun ContactAddView(
             verticalArrangement = Arrangement.Top
         ) {
             ContactHeaderView(onCancel, onDone)
-            ContactEditList(contact = contact!!, contactDetailViewModel)
+            ContactEditList(contact = contact!!, contactDetailViewModel, onAdd = {
+                contactInputType.value = it
+                showInputDialog.value = true
+            },)
         }
+    }
+
+    if (showInputDialog.value) {
+        TextEditDialogView(
+            title = "Please type the contact ${contactInputType.value}",
+            hint = contactInputType.value.toString(),
+            onCancel = {
+                showInputDialog.value = false
+            },
+            onConfirm = {
+                when (contactInputType.value) {
+                    ContactInputType.Address -> {
+                        contactDetailViewModel.updateContact(contact = contact!!.copy(location = it))
+                    }
+                    ContactInputType.Mail -> {
+                        contactDetailViewModel.updateContact(contact = contact!!.copy(email = it))
+                    }
+                    ContactInputType.Name -> {
+                        contactDetailViewModel.updateContact(contact = contact!!.copy(name = it))
+                    }
+                    ContactInputType.Phone -> {
+                        contactDetailViewModel.updateContact(contact = contact!!.copy(number = it.toLong()))
+                    }
+                }
+                showInputDialog.value = false
+            })
     }
 }
 
+@ExperimentalComposeUiApi
 @Composable
-private fun ContactEditList(contact: Contact, contactDetailViewModel: ContactDetailViewModel) {
+private fun ContactEditList(
+    contact: Contact,
+    contactDetailViewModel: ContactDetailViewModel,
+    onAdd: ((ContactInputType) -> Unit),
+) {
     LazyColumn(content = {
         item {
             ContactEditAvatar()
@@ -56,26 +100,33 @@ private fun ContactEditList(contact: Contact, contactDetailViewModel: ContactDet
             if (contact.number != null) {
                 InfoRemoveView(hint = "phone", content = contact.number.toString())
             } else {
-                InfoAddView(addHint = "phone")
+                InfoAddView(addHint = "phone", onAdd = {
+                    onAdd(ContactInputType.Phone)
+                })
             }
 
             // email field
             if (!contact.email.isNullOrEmpty()) {
                 InfoRemoveView(hint = "email", content = contact.email)
             } else {
-                InfoAddView(addHint = "email")
+                InfoAddView(addHint = "email", onAdd = {
+                    onAdd(ContactInputType.Mail)
+                })
             }
 
             // address field
             if (!contact.location.isNullOrEmpty()) {
                 InfoRemoveView(hint = "address", content = contact.location)
             } else {
-                InfoAddView(addHint = "address")
+                InfoAddView(addHint = "address", onAdd = {
+                    onAdd(ContactInputType.Address)
+                })
             }
         }
     })
 }
 
+@ExperimentalComposeUiApi
 @Composable
 private fun TextInfoSection(contact: Contact, contactDetailViewModel: ContactDetailViewModel) {
     Column(modifier = Modifier.padding(vertical = 15.dp)) {
