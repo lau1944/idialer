@@ -344,7 +344,7 @@ private fun ContactEditView(
                 )
             }
 
-            if (!contactViewModel.existInContact(contact.number)) {
+            if (!contactViewModel.existInContact(contact.name)) {
                 Box(modifier = Modifier
                     .fillMaxWidth()
                     .clickable {
