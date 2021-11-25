@@ -1,5 +1,7 @@
 package com.vau.studio.iosstyle.idialer_phone.views.composable.components
 
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -15,6 +17,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -24,6 +28,8 @@ import com.vau.studio.iosstyle.idialer_phone.data.models.Contact
 import com.vau.studio.iosstyle.idialer_phone.data.models.ContactInputType
 import com.vau.studio.iosstyle.idialer_phone.views.composable.*
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.ContactDetailViewModel
+import java.lang.Exception
+import java.lang.NumberFormatException
 
 @ExperimentalComposeUiApi
 @Composable
@@ -32,6 +38,7 @@ fun ContactAddView(
     onCancel: () -> Unit,
     onDone: () -> Unit
 ) {
+    val context = LocalContext.current
     val contact by contactDetailViewModel.newContact.observeAsState()
 
     val showInputDialog = remember {
@@ -50,17 +57,24 @@ fun ContactAddView(
             verticalArrangement = Arrangement.Top
         ) {
             ContactHeaderView(onCancel, onDone)
-            ContactEditList(contact = contact!!, contactDetailViewModel, onAdd = {
-                contactInputType.value = it
-                showInputDialog.value = true
-            },)
+            ContactEditList(
+                contact = contact!!, contactDetailViewModel,
+                onAdd = {
+                    contactInputType.value = it
+                    showInputDialog.value = true
+                },
+                onRemoved = {
+                    removeInfo(contact as Contact, it, contactDetailViewModel)
+                }
+            )
         }
     }
 
     if (showInputDialog.value) {
         TextEditDialogView(
+            value = contact?.getFieldFromType(contactInputType.value) ?: "",
             title = "Please type the contact ${contactInputType.value}",
-            hint = contactInputType.value.toString(),
+            //hint = contactInputType.value.toString(),
             onCancel = {
                 showInputDialog.value = false
             },
@@ -76,11 +90,43 @@ fun ContactAddView(
                         contactDetailViewModel.updateContact(contact = contact!!.copy(name = it))
                     }
                     ContactInputType.Phone -> {
-                        contactDetailViewModel.updateContact(contact = contact!!.copy(number = it.toLong()))
+                        try {
+                            contactDetailViewModel.updateContact(contact = contact!!.copy(number = it.toLong()))
+                        } catch (e: NumberFormatException) {
+                            Toast.makeText(
+                                context,
+                                "Please type a valid number",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            Log.i("ContactAddView", e.toString())
+                        } catch (e: Exception) {
+                            Log.i("ContactAddView", e.toString())
+                        }
                     }
                 }
                 showInputDialog.value = false
             })
+    }
+}
+
+private fun removeInfo(
+    contact: Contact,
+    contactInputType: ContactInputType,
+    contactDetailViewModel: ContactDetailViewModel
+) {
+    when (contactInputType) {
+        ContactInputType.Address -> {
+            contactDetailViewModel.updateContact(contact = contact.copy(location = null))
+        }
+        ContactInputType.Mail -> {
+            contactDetailViewModel.updateContact(contact = contact.copy(email = null))
+        }
+        ContactInputType.Name -> {
+            contactDetailViewModel.updateContact(contact = contact.copy(name = null))
+        }
+        ContactInputType.Phone -> {
+            contactDetailViewModel.updateContact(contact = contact.copy(number = null))
+        }
     }
 }
 
@@ -90,6 +136,7 @@ private fun ContactEditList(
     contact: Contact,
     contactDetailViewModel: ContactDetailViewModel,
     onAdd: ((ContactInputType) -> Unit),
+    onRemoved: (ContactInputType) -> Unit,
 ) {
     LazyColumn(content = {
         item {
@@ -98,7 +145,11 @@ private fun ContactEditList(
 
             // phone field
             if (contact.number != null) {
-                InfoRemoveView(hint = "phone", content = contact.number.toString())
+                InfoRemoveView(hint = "phone", content = contact.number.toString(), onRemove = {
+                    onRemoved(ContactInputType.Phone)
+                }, onEdit = {
+                    onAdd(ContactInputType.Phone)
+                })
             } else {
                 InfoAddView(addHint = "phone", onAdd = {
                     onAdd(ContactInputType.Phone)
@@ -107,7 +158,11 @@ private fun ContactEditList(
 
             // email field
             if (!contact.email.isNullOrEmpty()) {
-                InfoRemoveView(hint = "email", content = contact.email)
+                InfoRemoveView(hint = "email", content = contact.email, onRemove = {
+                    onRemoved(ContactInputType.Mail)
+                }, onEdit = {
+                    onAdd(ContactInputType.Mail)
+                })
             } else {
                 InfoAddView(addHint = "email", onAdd = {
                     onAdd(ContactInputType.Mail)
@@ -116,7 +171,11 @@ private fun ContactEditList(
 
             // address field
             if (!contact.location.isNullOrEmpty()) {
-                InfoRemoveView(hint = "address", content = contact.location)
+                InfoRemoveView(hint = "address", content = contact.location, onRemove = {
+                    onRemoved(ContactInputType.Address)
+                }, onEdit = {
+                    onAdd(ContactInputType.Address)
+                })
             } else {
                 InfoAddView(addHint = "address", onAdd = {
                     onAdd(ContactInputType.Address)
@@ -158,12 +217,13 @@ private fun ContactEditAvatar() {
 }
 
 @Composable
-private fun InfoRemoveView(hint: String, content: String, onRemove: (() -> Unit)? = null) {
-    EditView(
-        modifier = Modifier.clickable {
-            onRemove?.invoke()
-        }
-    ) {
+private fun InfoRemoveView(
+    hint: String,
+    content: String,
+    onEdit: (() -> Unit)? = null,
+    onRemove: (() -> Unit)? = null
+) {
+    EditView {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start,
@@ -175,10 +235,17 @@ private fun InfoRemoveView(hint: String, content: String, onRemove: (() -> Unit)
             AssetImage(
                 res = R.drawable.ic_remove_in_contact,
                 size = 20,
-                modifier = Modifier.padding(horizontal = 12.dp)
+                modifier = Modifier
+                    .padding(horizontal = 12.dp)
+                    .clickable {
+                        onRemove?.invoke()
+                    }
             )
             Row(
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.clickable {
+                    onEdit?.invoke()
+                }
             ) {
                 Text(
                     hint,

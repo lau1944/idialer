@@ -27,14 +27,15 @@ import com.vau.studio.iosstyle.idialer_phone.views.composable.*
 @ExperimentalComposeUiApi
 @Composable
 fun TextEditDialogView(
+    value: String = "",
     title: String,
-    hint: String = "",
+    hint: String = "Type here",
     onCancel: () -> Unit,
     onConfirm: (String) -> Unit,
 ) {
     val context = LocalContext.current
     val inputText = remember {
-        mutableStateOf("")
+        mutableStateOf(value)
     }
 
     Box(
