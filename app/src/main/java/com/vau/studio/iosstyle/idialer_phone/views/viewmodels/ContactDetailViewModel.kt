@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.core.animateDpAsState
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -35,8 +36,29 @@ class ContactDetailViewModel @Inject constructor(
     private val _newContact = MutableLiveData<Contact>(Contact())
     val newContact: LiveData<Contact> get() = _newContact
 
+    private val _contactAddResultState = MutableLiveData<UiState<Contact>>(UiState.InIdle)
+    val contactAddResultState: LiveData<UiState<Contact>> get() = _contactAddResultState
+
     init {
         initState()
+    }
+
+    fun createContact() = viewModelScope.launch {
+        val contact = _newContact.value
+
+        if (contact != null) {
+            updateContactCreateState(UiState.InProgress)
+            val result = phoneRepository.createNewContact(context, contact = contact)
+            if (result.isSuccessful) {
+                updateContactCreateState(UiState.Success(null))
+            } else {
+                updateContactCreateState(UiState.Failed())
+            }
+        }
+    }
+
+    fun updateContactCreateState(state: UiState<Contact>) {
+        _contactAddResultState.value = state
     }
 
     fun updateContact(contact: Contact) {

@@ -28,6 +28,7 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.vau.studio.iosstyle.idialer_phone.core.OpenUtil
 import com.vau.studio.iosstyle.idialer_phone.data.CONTACT_READ_PERMISSION
 import com.vau.studio.iosstyle.idialer_phone.data.CONTACT_WRITE_PERMISSION
+import com.vau.studio.iosstyle.idialer_phone.data.GET_ACCOUNT_PERMISSION
 import com.vau.studio.iosstyle.idialer_phone.data.models.Contact
 import com.vau.studio.iosstyle.idialer_phone.data.models.UiState
 import com.vau.studio.iosstyle.idialer_phone.views.composable.appColor
@@ -48,8 +49,7 @@ fun ContactUi(
     val scrollState = rememberLazyListState()
     val contactPermissionsState = rememberMultiplePermissionsState(
         permissions = listOf(
-            CONTACT_READ_PERMISSION,
-            CONTACT_WRITE_PERMISSION
+            GET_ACCOUNT_PERMISSION
         )
     )
 

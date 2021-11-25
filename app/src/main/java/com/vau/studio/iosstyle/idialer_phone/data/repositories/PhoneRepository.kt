@@ -14,6 +14,15 @@ import androidx.annotation.RequiresApi
 import androidx.core.database.getStringOrNull
 import com.vau.studio.iosstyle.idialer_phone.data.models.CallHistory
 import com.vau.studio.iosstyle.idialer_phone.data.models.Contact
+import contacts.async.commitAsync
+import contacts.core.Contacts
+import contacts.core.Insert
+import contacts.core.entities.MutableAddress
+import contacts.core.entities.MutableEmail
+import contacts.core.entities.MutableName
+import contacts.core.util.addAddress
+import contacts.core.util.addEmail
+import contacts.core.util.setName
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -29,6 +38,35 @@ import java.lang.IllegalStateException
 object PhoneRepository {
 
     private const val TAG: String = "PhoneRepository"
+
+    /**
+     * Insert a new contact
+     */
+    suspend fun createNewContact(
+        @ApplicationContext context: Context,
+        contact: Contact
+    ): Insert.Result {
+        val insertResult = Contacts(context)
+            .insert()
+            .rawContact {
+                setName {
+                    this.displayName = contact.name
+                }
+                if (!contact.email.isNullOrEmpty()) {
+                    addEmail {
+                        this.address = contact.email
+                    }
+                }
+                if (!contact.location.isNullOrEmpty()) {
+                    addAddress {
+                        this.formattedAddress = contact.location
+                    }
+                }
+            }
+            .allowBlanks(true)
+            .commitAsync(Dispatchers.IO).await()
+        return insertResult
+    }
 
     /**
      * Get all contacts

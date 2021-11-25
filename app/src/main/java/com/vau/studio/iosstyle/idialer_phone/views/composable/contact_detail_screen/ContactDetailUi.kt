@@ -1,8 +1,10 @@
 package com.vau.studio.iosstyle.idialer_phone.views.composable.contact_detail_screen
 
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.telephony.emergency.EmergencyNumber
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -60,9 +62,14 @@ fun ContactDetailUi(
     contactViewModel: ContactViewModel,
     contactDetailViewModel: ContactDetailViewModel,
 ) {
+    val context = LocalContext.current
     val backgroundColor = remember {
         backgroundGray
     }
+    val newContact by contactDetailViewModel.newContact.observeAsState()
+    val contactCreateState by contactDetailViewModel.contactAddResultState.observeAsState()
+
+    handleAddState(context, contactCreateState, contactDetailViewModel)
 
     Scaffold(
         topBar = {
@@ -74,14 +81,23 @@ fun ContactDetailUi(
     ) {
         val contactDetailState by contactDetailViewModel.contactDetail.observeAsState()
         val isDefaultDialer by mainViewModel.isDefaultCaller.observeAsState(false)
-        val context = LocalContext.current
         val showDialog = remember {
             mutableStateOf(false)
         }
 
         if (showDialog.value) {
             ShowContactCreateDialog(contactDetailViewModel = contactDetailViewModel, onDone = {
-
+                if (newContact?.name.isNullOrEmpty()) {
+                    Toast.makeText(
+                        context,
+                        "Name should not be empty",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return@ShowContactCreateDialog
+                }
+                // insert new contact
+                contactDetailViewModel.createContact()
+                showDialog.value = false
             }, onDismiss = {
                 showDialog.value = false
             })
@@ -130,6 +146,31 @@ fun ContactDetailUi(
             })
         }
     }
+}
+
+private fun handleAddState(
+    context: Context,
+    contactAddState: UiState<Contact>?,
+    contactDetailViewModel: ContactDetailViewModel
+) {
+    when (contactAddState) {
+        is UiState.Success<*> -> {
+            Toast.makeText(
+                context,
+                "Contact has been successfully added",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+        is UiState.Failed -> {
+            Toast.makeText(
+                context,
+                "Contact added fail, please try again",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+        else -> return
+    }
+    contactDetailViewModel.updateContactCreateState(UiState.InIdle)
 }
 
 @ExperimentalComposeUiApi
