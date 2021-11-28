@@ -111,7 +111,8 @@ object PhoneRepository {
                 ContactsContract.CommonDataKinds.Phone.NUMBER,
                 ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
                 ContactsContract.PhoneLookup.PHOTO_THUMBNAIL_URI,
-                ContactsContract.CommonDataKinds.StructuredPostal.DATA
+                ContactsContract.CommonDataKinds.StructuredPostal.DATA,
+                ContactsContract.CommonDataKinds.Phone.HAS_PHONE_NUMBER
             ),
             lookUp,
             null,
@@ -137,15 +138,18 @@ object PhoneRepository {
                         cursor.getColumnIndex(ContactsContract.PhoneLookup.PHOTO_THUMBNAIL_URI)
                     val postalIndex =
                         cursor.getColumnIndex(ContactsContract.CommonDataKinds.StructuredPostal.DATA)
+                    val hasPhoneNumberIndex =
+                        cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.HAS_PHONE_NUMBER)
                     val id = cursor.getString(idIndex)
 
                     if (!contactIdSet.contains(id)) {
                         contactIdSet.add(id)
+                        val hasPhoneNumber = cursor.getString(hasPhoneNumberIndex) != "0"
                         contacts.add(
                             Contact(
                                 name = cursor.getString(nameIndex),
                                 email = cursor.getString(emailIndex),
-                                number = cursor.getString(numberIndex),
+                                number = if (hasPhoneNumber) cursor.getString(numberIndex) else "",
                                 contactId = id,
                                 phoneUrl = cursor.getString(phoneUrlIndex),
                                 postal = cursor.getString(postalIndex)

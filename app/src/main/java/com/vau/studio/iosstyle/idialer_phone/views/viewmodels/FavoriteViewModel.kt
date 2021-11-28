@@ -32,17 +32,6 @@ class FavoriteViewModel @Inject constructor(
         getAllFavorites()
     }
 
-    private fun getAllFavorites() = viewModelScope.launch {
-        favoriteRepository.getAllFavorite().flowOn(Dispatchers.Default)
-            .catch { e ->
-                Log.i(TAG, e.toString())
-                _contactListState.value = UiState.Failed(exception = e)
-            }
-            .collect { contacts ->
-                _contactListState.value = UiState.Success(contacts)
-            }
-    }
-
     fun updateFavorite(contact: Contact) = viewModelScope.launch {
         val contacts = (_contactListState.value as UiState.Success).data
         if (hasSameContact(contact.contactId, contacts!!)) {
@@ -96,6 +85,30 @@ class FavoriteViewModel @Inject constructor(
         if (DbUtils.isSuccess(operandNumber = operandNumber)) {
             _contactListState.value = UiState.Success(mutableListOf())
         }
+    }
+
+    fun exist(id: String?) : Boolean {
+        if (id == null) return false
+
+        if (_contactListState.value is UiState.Success) {
+            val contacts = (_contactListState.value as UiState.Success<List<Contact>>).data
+            return contacts?.any {
+                it.contactId == id
+            } ?: false
+        }
+
+        return false
+    }
+
+    private fun getAllFavorites() = viewModelScope.launch {
+        favoriteRepository.getAllFavorite().flowOn(Dispatchers.Default)
+            .catch { e ->
+                Log.i(TAG, e.toString())
+                _contactListState.value = UiState.Failed(exception = e)
+            }
+            .collect { contacts ->
+                _contactListState.value = UiState.Success(contacts)
+            }
     }
 
     private fun hasSameContact(contactId: String, contacts: List<Contact>): Boolean {

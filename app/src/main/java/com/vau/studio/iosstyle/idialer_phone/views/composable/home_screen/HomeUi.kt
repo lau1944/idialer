@@ -109,7 +109,8 @@ fun ScreenContent(
         composable(HomeScreen.FavoriteScreen.route) {
             FavoriteScreen(
                 favoriteViewModel = favoriteViewModel,
-                contactViewModel = contactViewModel
+                contactViewModel = contactViewModel,
+                mainViewModel = mainViewModel
             )
         }
         composable(HomeScreen.RecentScreen.route) {
@@ -140,7 +141,8 @@ fun ScreenContent(
                 id = entry.arguments?.getString("id"),
                 mainViewModel = mainViewModel,
                 contactViewModel = contactViewModel,
-                contactDetailViewModel = contactDetailViewModel
+                contactDetailViewModel = contactDetailViewModel,
+                favoriteViewModel = favoriteViewModel
             )
         }
     }

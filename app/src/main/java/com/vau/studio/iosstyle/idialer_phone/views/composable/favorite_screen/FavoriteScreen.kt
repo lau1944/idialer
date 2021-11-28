@@ -23,13 +23,21 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.vau.studio.iosstyle.idialer_phone.data.models.Contact
 import com.vau.studio.iosstyle.idialer_phone.data.models.UiState
 import com.vau.studio.iosstyle.idialer_phone.views.composable.components.UiProgressLayout
+import com.vau.studio.iosstyle.idialer_phone.views.composable.contact_detail_screen.CONTACT_DETAIL_ROUTE
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.ContactViewModel
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.FavoriteViewModel
+import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.MainViewModel
 
 @ExperimentalComposeUiApi
 @ExperimentalPermissionsApi
 @Composable
-fun FavoriteScreen(favoriteViewModel: FavoriteViewModel, contactViewModel: ContactViewModel) {
+fun FavoriteScreen(
+    favoriteViewModel: FavoriteViewModel,
+    contactViewModel: ContactViewModel,
+    mainViewModel: MainViewModel
+) {
+    val favoriteState by favoriteViewModel.contactListState.observeAsState()
+
     val isAddDialogShowed = remember {
         mutableStateOf(false)
     }
@@ -50,7 +58,6 @@ fun FavoriteScreen(favoriteViewModel: FavoriteViewModel, contactViewModel: Conta
             })
         }
     ) {
-        val favoriteState by favoriteViewModel.contactListState.observeAsState()
 
         UiProgressLayout(state = favoriteState) {
             val favoriteList = (favoriteState as UiState.Success).data as List<Contact>
@@ -62,18 +69,29 @@ fun FavoriteScreen(favoriteViewModel: FavoriteViewModel, contactViewModel: Conta
                     Text("No Favorites", style = TextStyle(color = Color.Gray.copy(alpha = 0.5f)))
                 }
             } else {
-                FavoriteList(contacts = favoriteList)
+                FavoriteList(contacts = favoriteList, onClick = {
+                    mainViewModel.navigateTo(
+                        route = CONTACT_DETAIL_ROUTE,
+                        args = mapOf(
+                            "id" to it.contactId,
+                            "number" to (it.number ?: ""),
+                            "prevName" to "Favorite"
+                        )
+                    )
+                })
             }
         }
     }
 }
 
 @Composable
-private fun FavoriteList(contacts: List<Contact>) {
+private fun FavoriteList(contacts: List<Contact>, onClick: (Contact) -> Unit) {
     LazyColumn(content = {
         items(contacts,
             itemContent = { contact ->
-                FavoriteItem(contact = contact)
+                FavoriteItem(contact = contact, onClick = {
+                    onClick(contact)
+                })
             })
     })
 }

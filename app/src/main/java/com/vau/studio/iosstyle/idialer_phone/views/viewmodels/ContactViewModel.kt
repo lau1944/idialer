@@ -86,12 +86,12 @@ class ContactViewModel @Inject constructor(
     /**
      * Check if contact exist in the list
      */
-    fun existInContact(contactName: String?): Boolean {
-        if (contactName == null) return false
+    fun existInContact(id: String?): Boolean {
+        if (id == null) return false
 
         val contacts = _contactList.value
         return contacts?.any {
-            it.name == contactName
+            it.contactId == id
         } ?: false
     }
 

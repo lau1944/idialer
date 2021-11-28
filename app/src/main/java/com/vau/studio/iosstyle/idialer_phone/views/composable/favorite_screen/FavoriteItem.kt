@@ -52,7 +52,7 @@ private fun UserContentView(contact: Contact) {
             .padding(horizontal = 10.dp)
     ) {
         Text(
-            text = contact.name ?: "",
+            text = contact.name ?: contact.number ?: "unknown",
             style = TextStyle(
                 color = appColor().surface,
                 fontWeight = FontWeight.Bold,

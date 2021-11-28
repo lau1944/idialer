@@ -1,10 +1,8 @@
 package com.vau.studio.iosstyle.idialer_phone.views.composable.contact_detail_screen
 
 import android.content.Context
-import android.content.Intent
 import android.net.Uri
 import android.os.Build
-import android.telephony.emergency.EmergencyNumber
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
@@ -30,17 +28,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.vau.studio.iosstyle.idialer_phone.BuildConfig
 import com.vau.studio.iosstyle.idialer_phone.R
 import com.vau.studio.iosstyle.idialer_phone.core.DateUtil
 import com.vau.studio.iosstyle.idialer_phone.core.ShareHandler
 import com.vau.studio.iosstyle.idialer_phone.core.TimeUtils
+import com.vau.studio.iosstyle.idialer_phone.core.ToastUtil
 import com.vau.studio.iosstyle.idialer_phone.data.INCOMING_CALL_TYPE
 import com.vau.studio.iosstyle.idialer_phone.data.MISSED_CALL_TYPE
 import com.vau.studio.iosstyle.idialer_phone.data.OUTGOING_CALL_TYPE
 import com.vau.studio.iosstyle.idialer_phone.data.models.Contact
 import com.vau.studio.iosstyle.idialer_phone.data.models.ContactPageType
-import com.vau.studio.iosstyle.idialer_phone.data.models.INCOMING_CALL
 import com.vau.studio.iosstyle.idialer_phone.data.models.UiState
 import com.vau.studio.iosstyle.idialer_phone.views.composable.*
 import com.vau.studio.iosstyle.idialer_phone.views.composable.components.AssetImage
@@ -49,6 +46,7 @@ import com.vau.studio.iosstyle.idialer_phone.views.composable.components.GlideIm
 import com.vau.studio.iosstyle.idialer_phone.views.composable.components.UiProgressLayout
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.ContactDetailViewModel
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.ContactViewModel
+import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.FavoriteViewModel
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.MainViewModel
 import java.util.*
 
@@ -64,6 +62,7 @@ fun ContactDetailUi(
     mainViewModel: MainViewModel,
     contactViewModel: ContactViewModel,
     contactDetailViewModel: ContactDetailViewModel,
+    favoriteViewModel: FavoriteViewModel
 ) {
     val context = LocalContext.current
     val backgroundColor = remember {
@@ -71,6 +70,10 @@ fun ContactDetailUi(
     }
     val newContact by contactDetailViewModel.newContact.observeAsState()
     val contactCreateState by contactDetailViewModel.contactAddResultState.observeAsState()
+
+    val isFavorite = remember {
+        mutableStateOf(favoriteViewModel.exist(id))
+    }
 
     handleAddState(context, contactCreateState, contactDetailViewModel)
 
@@ -109,12 +112,10 @@ fun ContactDetailUi(
         LaunchedEffect(true) {
             contactDetailViewModel.initState()
 
-            val page = ContactPageType.map(preName)
-            if (page == ContactPageType.Recent) {
-                contactDetailViewModel.getCallLogByNumber(number)
-            }
-            if (page == ContactPageType.Contact) {
+            if (contactViewModel.existInContact(id)) {
                 contactDetailViewModel.getContactDetailById(id!!)
+            } else {
+                contactDetailViewModel.getCallLogByNumber(number)
             }
         }
 
@@ -126,6 +127,12 @@ fun ContactDetailUi(
                     UserInfoView(contact = contact)
                     UserActionView(contact = contact)
 
+                    if (!contact.number.isNullOrEmpty()) {
+                        PhoneInfoView(phoneNumber = contact.number) {
+                            // on dial
+                        }
+                    }
+
                     if (preName == "Recents") {
                         Box(
                             modifier = Modifier.padding(10.dp)
@@ -133,14 +140,23 @@ fun ContactDetailUi(
                             CallInfoView(contact = contact)
                         }
                     }
-                    ContactEditView(
+                    ContactActionView(
                         contact = contact,
-                        contactViewModel = contactViewModel,
+                        existInContact = contactViewModel.existInContact(contact.contactId),
+                        isFavorite = isFavorite.value,
+                        onSend = {
+                            // send message
+                        },
                         onShare = {
                             ShareHandler.shareText(context, contact.number.toString())
                         },
                         onCreate = {
                             showDialog.value = true
+                        },
+                        addToFavorite = {
+                            isFavorite.value = true
+                            favoriteViewModel.addToFavorite(contact = contact)
+                            ToastUtil.make(context, "Contact has added to your favorites")
                         })
 
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isDefaultDialer)
@@ -196,6 +212,27 @@ fun ShowContactCreateDialog(
 }
 
 /**
+ * Phone info view
+ */
+@Composable
+private fun PhoneInfoView(phoneNumber: String, onClicked: () -> Unit) {
+    InfoViewHolder(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+    ) {
+        Column(modifier = Modifier.padding(5.dp)) {
+            Text("mobile", style = TextStyle(fontSize = 12.sp))
+            Text(
+                phoneNumber,
+                style = TextStyle(color = iosBlue, fontSize = 14.sp),
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
+        }
+    }
+}
+
+/**
  * User info header view
  */
 @Composable
@@ -206,7 +243,7 @@ private fun UserInfoView(contact: Contact) {
             .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        if (contact.phoneUrl != null) {
+        if (!contact.phoneUrl.isNullOrEmpty()) {
             GlideImage(
                 imageUrl = Uri.parse(contact.phoneUrl),
                 modifier = Modifier
@@ -367,11 +404,14 @@ private fun BlockContactView(number: String, contactViewModel: ContactViewModel)
  * Contact edit
  */
 @Composable
-private fun ContactEditView(
+private fun ContactActionView(
     contact: Contact,
-    contactViewModel: ContactViewModel,
+    isFavorite: Boolean,
+    existInContact: Boolean,
+    onSend: () -> Unit,
     onShare: () -> Unit,
     onCreate: () -> Unit,
+    addToFavorite: () -> Unit,
 ) {
     InfoViewHolder(
         modifier = Modifier
@@ -381,6 +421,30 @@ private fun ContactEditView(
         Column(
             horizontalAlignment = Alignment.Start,
         ) {
+            if (!contact.number.isNullOrEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            onSend.invoke()
+                        }
+                ) {
+                    Column {
+                        Text(
+                            "Send message", style = TextStyle(
+                                color = iosBlue,
+                                fontSize = 16.sp
+                            ),
+                            modifier = Modifier.padding(15.dp)
+                        )
+                        Divider(
+                            modifier = Modifier
+                                .background(iosGray.copy(alpha = 0.1f))
+                        )
+                    }
+                }
+            }
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -397,7 +461,7 @@ private fun ContactEditView(
                 )
             }
 
-            if (!contactViewModel.existInContact(contact.name)) {
+            if (!existInContact) {
                 Box(modifier = Modifier
                     .fillMaxWidth()
                     .clickable {
@@ -414,6 +478,30 @@ private fun ContactEditView(
                         ),
                         modifier = Modifier.padding(15.dp)
                     )
+                }
+            }
+
+            if (!isFavorite) {
+                Column() {
+                    Divider(
+                        modifier = Modifier
+                            .background(iosGray.copy(alpha = 0.1f))
+                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                addToFavorite()
+                            }
+                    ) {
+                        Text(
+                            "Add to Favorites", style = TextStyle(
+                                color = iosBlue,
+                                fontSize = 16.sp
+                            ),
+                            modifier = Modifier.padding(15.dp)
+                        )
+                    }
                 }
             }
         }
