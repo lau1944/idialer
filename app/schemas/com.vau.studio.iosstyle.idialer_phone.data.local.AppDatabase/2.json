@@ -2,23 +2,23 @@
   "formatVersion": 1,
   "database": {
     "version": 2,
-    "identityHash": "709f0ece0445f6c9986213f6f5b15131",
+    "identityHash": "ac045cf7c7c11c2aea9b469b8751e868",
     "entities": [
       {
         "tableName": "Contact",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`number` INTEGER PRIMARY KEY AUTOINCREMENT, `contactId` TEXT NOT NULL, `name` TEXT, `email` TEXT, `phoneUrl` TEXT, `postal` TEXT, `type` INTEGER, `callDate` TEXT, `duration` TEXT, `location` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`contactId` TEXT NOT NULL, `number` TEXT, `name` TEXT, `email` TEXT, `phoneUrl` TEXT, `postal` TEXT, `type` INTEGER, `callDate` TEXT, `duration` TEXT, `location` TEXT, PRIMARY KEY(`contactId`))",
         "fields": [
-          {
-            "fieldPath": "number",
-            "columnName": "number",
-            "affinity": "INTEGER",
-            "notNull": false
-          },
           {
             "fieldPath": "contactId",
             "columnName": "contactId",
             "affinity": "TEXT",
             "notNull": true
+          },
+          {
+            "fieldPath": "number",
+            "columnName": "number",
+            "affinity": "TEXT",
+            "notNull": false
           },
           {
             "fieldPath": "name",
@@ -71,9 +71,9 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "number"
+            "contactId"
           ],
-          "autoGenerate": true
+          "autoGenerate": false
         },
         "indices": [],
         "foreignKeys": []
@@ -82,7 +82,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '709f0ece0445f6c9986213f6f5b15131')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ac045cf7c7c11c2aea9b469b8751e868')"
     ]
   }
 }

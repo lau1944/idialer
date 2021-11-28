@@ -109,7 +109,7 @@ fun ContactAddView(
                     }
                     ContactInputType.Phone -> {
                         try {
-                            contactDetailViewModel.updateContact(contact = contact!!.copy(number = it.toLong()))
+                            contactDetailViewModel.updateContact(contact = contact!!.copy(number = it))
                         } catch (e: NumberFormatException) {
                             Toast.makeText(
                                 context,
@@ -146,7 +146,7 @@ private fun removeInfo(
             contactDetailViewModel.updateContact(contact = contact.copy(name = null))
         }
         ContactInputType.Phone -> {
-            contactDetailViewModel.updateContact(contact = contact.copy(number = null))
+            contactDetailViewModel.updateContact(contact = contact.copy(number = ""))
         }
         ContactInputType.Photo -> {
             contactDetailViewModel.updateContact(contact = contact.copy(phoneUrl = null))

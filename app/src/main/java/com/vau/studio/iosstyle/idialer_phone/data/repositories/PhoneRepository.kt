@@ -110,7 +110,7 @@ object PhoneRepository {
                 ContactsContract.CommonDataKinds.Email.DATA,
                 ContactsContract.CommonDataKinds.Phone.NUMBER,
                 ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
-                ContactsContract.Contacts.Photo.PHOTO_URI,
+                ContactsContract.PhoneLookup.PHOTO_THUMBNAIL_URI,
                 ContactsContract.CommonDataKinds.StructuredPostal.DATA
             ),
             lookUp,
@@ -134,19 +134,20 @@ object PhoneRepository {
                     val idIndex =
                         cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_ID)
                     val phoneUrlIndex =
-                        cursor.getColumnIndex(ContactsContract.Contacts.Photo.PHOTO_URI)
+                        cursor.getColumnIndex(ContactsContract.PhoneLookup.PHOTO_THUMBNAIL_URI)
                     val postalIndex =
                         cursor.getColumnIndex(ContactsContract.CommonDataKinds.StructuredPostal.DATA)
                     val id = cursor.getString(idIndex)
+
                     if (!contactIdSet.contains(id)) {
                         contactIdSet.add(id)
                         contacts.add(
                             Contact(
                                 name = cursor.getString(nameIndex),
                                 email = cursor.getString(emailIndex),
-                                number = cursor.getString(numberIndex).toLongOrNull(),
+                                number = cursor.getString(numberIndex),
                                 contactId = id,
-                                phoneUrl = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, id.toLong()).toString(),
+                                phoneUrl = cursor.getString(phoneUrlIndex),
                                 postal = cursor.getString(postalIndex)
                             )
                         )
@@ -197,7 +198,7 @@ object PhoneRepository {
                 while (cursor.moveToNext()) {
                     val contact = Contact(
                         name = cursor.getString(name),
-                        number = cursor.getString(number).toLong(),
+                        number = cursor.getString(number),
                         type = cursor.getString(type).toInt(),
                         callDate = cursor.getString(date),
                         duration = cursor.getString(duration),

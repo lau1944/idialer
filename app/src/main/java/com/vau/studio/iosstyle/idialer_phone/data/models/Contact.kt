@@ -1,17 +1,14 @@
 package com.vau.studio.iosstyle.idialer_phone.data.models
 
-import android.util.Log
-import android.widget.Toast
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import java.lang.Exception
-import java.lang.NumberFormatException
 
 @Entity
 data class Contact(
     @PrimaryKey(autoGenerate = true)
-    val number: Long? = null,
+    val primaryId: Int? = null,
     val contactId: String = "",
+    val number: String? = "",
     val name: String? = "",
     val email: String? = "",
     val phoneUrl: String? = "",

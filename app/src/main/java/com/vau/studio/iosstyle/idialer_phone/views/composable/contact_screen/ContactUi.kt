@@ -59,6 +59,8 @@ fun ContactUi(
     val scrollState = rememberLazyListState()
     val contactPermissionsState = rememberMultiplePermissionsState(
         permissions = listOf(
+            CONTACT_READ_PERMISSION,
+            CONTACT_WRITE_PERMISSION,
             GET_ACCOUNT_PERMISSION
         )
     )
