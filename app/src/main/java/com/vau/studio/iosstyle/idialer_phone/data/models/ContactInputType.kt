@@ -1,7 +1,7 @@
 package com.vau.studio.iosstyle.idialer_phone.data.models
 
 enum class ContactInputType {
-    Phone, Mail, Address, Name;
+    Phone, Mail, Address, Name, Photo;
 
     override fun toString() : String{
         return when (this) {
@@ -9,6 +9,7 @@ enum class ContactInputType {
             Mail -> "email"
             Address -> "address"
             Name -> "name"
+            Photo -> "photo"
         }
     }
 }

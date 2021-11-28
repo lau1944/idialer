@@ -55,6 +55,7 @@ class ContactDetailViewModel @Inject constructor(
                 updateContactCreateState(UiState.Failed())
             }
         }
+        _newContact.value = Contact()
     }
 
     fun updateContactCreateState(state: UiState<Contact>) {
@@ -71,7 +72,7 @@ class ContactDetailViewModel @Inject constructor(
             .collect { contacts ->
                 if (!contacts.isNullOrEmpty()) {
                     _contactDetail.value = UiState.Success(contacts.first())
-                    updateContact(contacts.first())
+                    //updateContact(contacts.first())
                 }
             }
     }
@@ -82,7 +83,7 @@ class ContactDetailViewModel @Inject constructor(
             .collect { contacts ->
                 if (!contacts.isNullOrEmpty()) {
                     _contactDetail.value = UiState.Success(contacts.first())
-                    updateContact(contacts.first())
+                    //updateContact(contacts.first())
                 }
             }
     }
@@ -93,7 +94,7 @@ class ContactDetailViewModel @Inject constructor(
             .collect { contacts ->
                 if (!contacts.isNullOrEmpty()) {
                     _contactDetail.value = UiState.Success(contacts.first())
-                    updateContact(contacts.first())
+                    //updateContact(contacts.first())
                 }
             }
     }

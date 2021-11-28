@@ -2,6 +2,7 @@ package com.vau.studio.iosstyle.idialer_phone.views.composable.contact_screen
 
 import android.provider.ContactsContract
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.Text
@@ -26,7 +27,8 @@ import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.ContactViewModel
 @Composable
 fun ContactAppBar(
     scrollState: LazyListState,
-    contactViewModel: ContactViewModel
+    contactViewModel: ContactViewModel,
+    onAdd: () -> Unit
 ) {
     Column(
         horizontalAlignment = Alignment.End
@@ -41,7 +43,13 @@ fun ContactAppBar(
                 contentAlignment = Alignment.CenterEnd,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                AssetImage(res = R.drawable.ic_plus, size = 20, color = iosBlue)
+                AssetImage(
+                    res = R.drawable.ic_plus,
+                    size = 20,
+                    color = iosBlue,
+                    modifier = Modifier.clickable {
+                        onAdd()
+                    })
             }
         }
         Column {

@@ -2,6 +2,7 @@ package com.vau.studio.iosstyle.idialer_phone.views.composable.contact_detail_sc
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.telephony.emergency.EmergencyNumber
 import android.widget.Toast
@@ -10,6 +11,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Divider
 import androidx.compose.material.Scaffold
@@ -43,6 +45,7 @@ import com.vau.studio.iosstyle.idialer_phone.data.models.UiState
 import com.vau.studio.iosstyle.idialer_phone.views.composable.*
 import com.vau.studio.iosstyle.idialer_phone.views.composable.components.AssetImage
 import com.vau.studio.iosstyle.idialer_phone.views.composable.components.ContactAddView
+import com.vau.studio.iosstyle.idialer_phone.views.composable.components.GlideImage
 import com.vau.studio.iosstyle.idialer_phone.views.composable.components.UiProgressLayout
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.ContactDetailViewModel
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.ContactViewModel
@@ -175,7 +178,7 @@ private fun handleAddState(
 
 @ExperimentalComposeUiApi
 @Composable
-private fun ShowContactCreateDialog(
+fun ShowContactCreateDialog(
     contactDetailViewModel: ContactDetailViewModel,
     onDismiss: () -> Unit,
     onDone: () -> Unit
@@ -203,7 +206,17 @@ private fun UserInfoView(contact: Contact) {
             .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        AssetImage(res = R.drawable.ic_big_user, size = 65)
+        println(contact.phoneUrl)
+        if (contact.phoneUrl != null) {
+            GlideImage(
+                imageUrl = Uri.parse(contact.phoneUrl),
+                modifier = Modifier
+                    .size(75.dp)
+                    .clip(CircleShape)
+            )
+        } else {
+            AssetImage(res = R.drawable.ic_big_user, size = 65)
+        }
         Text(
             contact.name ?: contact.number?.toString() ?: "Unknown",
             style = TextStyle(color = appColor().surface, fontSize = 24.sp),

@@ -2,13 +2,16 @@ package com.vau.studio.iosstyle.idialer_phone.data.repositories
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.ContentUris
 import android.content.ContentValues
 import android.content.Context
+import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
 import android.provider.BlockedNumberContract
 import android.provider.CallLog
 import android.provider.ContactsContract
+import android.provider.MediaStore
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.database.getStringOrNull
@@ -16,6 +19,7 @@ import com.vau.studio.iosstyle.idialer_phone.data.models.CallHistory
 import com.vau.studio.iosstyle.idialer_phone.data.models.Contact
 import contacts.async.commitAsync
 import contacts.core.Contacts
+import contacts.core.Fields.Contact
 import contacts.core.Insert
 import contacts.core.entities.MutableAddress
 import contacts.core.entities.MutableEmail
@@ -23,6 +27,7 @@ import contacts.core.entities.MutableName
 import contacts.core.util.addAddress
 import contacts.core.util.addEmail
 import contacts.core.util.setName
+import contacts.core.util.setPhoto
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -62,6 +67,28 @@ object PhoneRepository {
                         this.formattedAddress = contact.location
                     }
                 }
+
+                if (!contact.phoneUrl.isNullOrEmpty()) {
+                    try {
+                        val uri = Uri.parse(contact.phoneUrl)
+                        val bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                            ImageDecoder.decodeBitmap(
+                                ImageDecoder.createSource(
+                                    context.contentResolver,
+                                    uri
+                                )
+                            )
+                        } else {
+                            MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
+                        }
+                        setPhoto(
+                            context, bitmap
+                        )
+
+                    } catch (e: Exception) {
+                        Log.i(TAG, e.toString())
+                    }
+                }
             }
             .allowBlanks(true)
             .commitAsync(Dispatchers.IO).await()
@@ -83,7 +110,7 @@ object PhoneRepository {
                 ContactsContract.CommonDataKinds.Email.DATA,
                 ContactsContract.CommonDataKinds.Phone.NUMBER,
                 ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
-                ContactsContract.CommonDataKinds.Phone.PHOTO_URI,
+                ContactsContract.Contacts.Photo.PHOTO_URI,
                 ContactsContract.CommonDataKinds.StructuredPostal.DATA
             ),
             lookUp,
@@ -107,10 +134,9 @@ object PhoneRepository {
                     val idIndex =
                         cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_ID)
                     val phoneUrlIndex =
-                        cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.PHOTO_URI)
+                        cursor.getColumnIndex(ContactsContract.Contacts.Photo.PHOTO_URI)
                     val postalIndex =
                         cursor.getColumnIndex(ContactsContract.CommonDataKinds.StructuredPostal.DATA)
-
                     val id = cursor.getString(idIndex)
                     if (!contactIdSet.contains(id)) {
                         contactIdSet.add(id)
@@ -120,7 +146,7 @@ object PhoneRepository {
                                 email = cursor.getString(emailIndex),
                                 number = cursor.getString(numberIndex).toLongOrNull(),
                                 contactId = id,
-                                phoneUrl = cursor.getString(phoneUrlIndex),
+                                phoneUrl = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, id.toLong()).toString(),
                                 postal = cursor.getString(postalIndex)
                             )
                         )

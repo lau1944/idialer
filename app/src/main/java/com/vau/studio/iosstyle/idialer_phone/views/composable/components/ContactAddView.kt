@@ -1,19 +1,20 @@
 package com.vau.studio.iosstyle.idialer_phone.views.composable.components
 
+import android.net.Uri
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Divider
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -47,6 +48,9 @@ fun ContactAddView(
     val contactInputType = remember {
         mutableStateOf<ContactInputType?>(null)
     }
+    val selectedPhoto = remember {
+        mutableStateOf<String?>(null)
+    }
 
     Box(
         Modifier
@@ -56,9 +60,24 @@ fun ContactAddView(
         Column(
             verticalArrangement = Arrangement.Top
         ) {
-            ContactHeaderView(onCancel, onDone)
+            ContactHeaderView(onCancel, {
+                if (contact?.name.isNullOrEmpty()) {
+                    Toast.makeText(
+                        context,
+                        "Name cannot be empty",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } else {
+                    onDone()
+                }
+            })
             ContactEditList(
-                contact = contact!!, contactDetailViewModel,
+                !showInputDialog.value, contact = contact!!, contactDetailViewModel,
+                onAddPhoto = {
+                    contactInputType.value = ContactInputType.Photo
+                    selectedPhoto.value = it
+                    contactDetailViewModel.updateContact(contact!!.copy(phoneUrl = it))
+                },
                 onAdd = {
                     contactInputType.value = it
                     showInputDialog.value = true
@@ -74,7 +93,6 @@ fun ContactAddView(
         TextEditDialogView(
             value = contact?.getFieldFromType(contactInputType.value) ?: "",
             title = "Please type the contact ${contactInputType.value}",
-            //hint = contactInputType.value.toString(),
             onCancel = {
                 showInputDialog.value = false
             },
@@ -103,6 +121,9 @@ fun ContactAddView(
                             Log.i("ContactAddView", e.toString())
                         }
                     }
+                    ContactInputType.Photo -> {
+                        contactDetailViewModel.updateContact(contact!!.copy(phoneUrl = selectedPhoto.value))
+                    }
                 }
                 showInputDialog.value = false
             })
@@ -127,57 +148,78 @@ private fun removeInfo(
         ContactInputType.Phone -> {
             contactDetailViewModel.updateContact(contact = contact.copy(number = null))
         }
+        ContactInputType.Photo -> {
+            contactDetailViewModel.updateContact(contact = contact.copy(phoneUrl = null))
+        }
     }
 }
 
 @ExperimentalComposeUiApi
 @Composable
 private fun ContactEditList(
+    isCardClickable: Boolean,
     contact: Contact,
     contactDetailViewModel: ContactDetailViewModel,
     onAdd: ((ContactInputType) -> Unit),
+    onAddPhoto: (String) -> Unit,
     onRemoved: (ContactInputType) -> Unit,
 ) {
     LazyColumn(content = {
         item {
-            ContactEditAvatar()
+            ContactEditAvatar(isCardClickable, onAdd = {
+                onAddPhoto(it)
+            })
+
             TextInfoSection(contact, contactDetailViewModel)
 
             // phone field
             if (contact.number != null) {
-                InfoRemoveView(hint = "phone", content = contact.number.toString(), onRemove = {
-                    onRemoved(ContactInputType.Phone)
-                }, onEdit = {
-                    onAdd(ContactInputType.Phone)
-                })
+                InfoRemoveView(
+                    isClickable = isCardClickable,
+                    hint = "phone",
+                    content = contact.number.toString(), onRemove = {
+                        onRemoved(ContactInputType.Phone)
+                    }, onEdit = {
+                        onAdd(ContactInputType.Phone)
+                    })
             } else {
-                InfoAddView(addHint = "phone", onAdd = {
+                InfoAddView(isClickable = isCardClickable, addHint = "phone", onAdd = {
                     onAdd(ContactInputType.Phone)
                 })
             }
 
             // email field
             if (!contact.email.isNullOrEmpty()) {
-                InfoRemoveView(hint = "email", content = contact.email, onRemove = {
-                    onRemoved(ContactInputType.Mail)
-                }, onEdit = {
-                    onAdd(ContactInputType.Mail)
-                })
+                InfoRemoveView(
+                    isClickable = isCardClickable,
+                    hint = "email",
+                    content = contact.email,
+                    onRemove = {
+                        onRemoved(ContactInputType.Mail)
+                    },
+                    onEdit = {
+                        onAdd(ContactInputType.Mail)
+                    })
             } else {
-                InfoAddView(addHint = "email", onAdd = {
+                InfoAddView(isClickable = isCardClickable, addHint = "email", onAdd = {
                     onAdd(ContactInputType.Mail)
                 })
             }
 
             // address field
             if (!contact.location.isNullOrEmpty()) {
-                InfoRemoveView(hint = "address", content = contact.location, onRemove = {
-                    onRemoved(ContactInputType.Address)
-                }, onEdit = {
-                    onAdd(ContactInputType.Address)
-                })
+                InfoRemoveView(
+                    isClickable = isCardClickable,
+                    hint = "address",
+                    content = contact.location,
+                    onRemove = {
+                        onRemoved(ContactInputType.Address)
+                    },
+                    onEdit = {
+                        onAdd(ContactInputType.Address)
+                    })
             } else {
-                InfoAddView(addHint = "address", onAdd = {
+                InfoAddView(isClickable = isCardClickable, addHint = "address", onAdd = {
                     onAdd(ContactInputType.Address)
                 })
             }
@@ -199,25 +241,53 @@ private fun TextInfoSection(contact: Contact, contactDetailViewModel: ContactDet
 }
 
 @Composable
-private fun ContactEditAvatar() {
+private fun ContactEditAvatar(isClickable: Boolean, onAdd: (String) -> Unit) {
+    var imageUri by remember {
+        mutableStateOf<Uri?>(null)
+    }
+
+    val launcher = rememberLauncherForActivityResult(
+        contract =
+        ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        imageUri = uri
+        onAdd(imageUri.toString())
+    }
+
     Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
         Column(
             verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            AssetImage(
-                res = R.drawable.ic_big_user,
-                size = 75,
-                modifier = Modifier
-                    .padding(vertical = 10.dp)
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.clickable(
+                enabled = isClickable,
+                onClick = {
+                    launcher.launch("image/*")
+                }
             )
-            Text("add photo", style = TextStyle(color = iosBlue))
+        ) {
+            if (imageUri == null) {
+                AssetImage(
+                    res = R.drawable.ic_big_user,
+                    size = 75,
+                    modifier = Modifier
+                        .padding(vertical = 10.dp)
+                )
+            } else {
+                GlideImage(
+                    imageUrl = imageUri!!,
+                    modifier = Modifier
+                        .size(75.dp)
+                        .clip(CircleShape)
+                )
+            }
+            Text(if (imageUri == null) "add photo" else "edit", style = TextStyle(color = iosBlue))
         }
     }
 }
 
 @Composable
 private fun InfoRemoveView(
+    isClickable: Boolean,
     hint: String,
     content: String,
     onEdit: (() -> Unit)? = null,
@@ -243,9 +313,12 @@ private fun InfoRemoveView(
             )
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.clickable {
-                    onEdit?.invoke()
-                }
+                modifier = Modifier.clickable(
+                    enabled = isClickable,
+                    onClick = {
+                        onEdit?.invoke()
+                    }
+                )
             ) {
                 Text(
                     hint,
@@ -262,12 +335,15 @@ private fun InfoRemoveView(
 }
 
 @Composable
-private fun InfoAddView(addHint: String, onAdd: (() -> Unit)? = null) {
+private fun InfoAddView(isClickable: Boolean, addHint: String, onAdd: (() -> Unit)? = null) {
     EditView(
         modifier = Modifier
-            .clickable {
-                onAdd?.invoke()
-            }
+            .clickable(
+                enabled = isClickable,
+                onClick = {
+                    onAdd?.invoke()
+                }
+            )
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,

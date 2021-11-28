@@ -52,6 +52,7 @@ class ContactViewModel @Inject constructor(
         phoneRepository.getContactNames(context, lookUp)
             .flowOn(Dispatchers.Default)
             .catch { e ->
+                println(e)
                 _queriedContactState.value = UiState.Failed(e)
             }
             .collect { contacts ->

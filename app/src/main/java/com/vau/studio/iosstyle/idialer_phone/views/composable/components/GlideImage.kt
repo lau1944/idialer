@@ -8,16 +8,16 @@ import androidx.compose.ui.unit.dp
 import com.skydoves.landscapist.glide.GlideImage
 
 @Composable
-fun NetworkImage(
-    modifier: Modifier? = Modifier.size(25.dp),
-    imageUrl: String,
+fun GlideImage(
+    modifier: Modifier = Modifier.size(25.dp),
+    imageUrl: Any,
     scale: ContentScale? = ContentScale.Crop,
     placeholder: Any? = null
 ) {
     GlideImage(
         imageModel = imageUrl,
         contentScale = ContentScale.Crop,
-        modifier = modifier!!,
+        modifier = modifier,
         placeHolder = placeholder,
         error = placeholder
     )

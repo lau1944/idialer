@@ -121,6 +121,7 @@ fun ScreenContent(
         composable(HomeScreen.ContactScreen.route) {
             ContactUi(
                 contactViewModel = contactViewModel,
+                contactDetailViewModel = contactDetailViewModel,
                 mainViewModel = mainViewModel
             )
         }

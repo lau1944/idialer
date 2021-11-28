@@ -10,7 +10,7 @@ import java.lang.NumberFormatException
 @Entity
 data class Contact(
     @PrimaryKey(autoGenerate = true)
-    val number: Long? = 0,
+    val number: Long? = null,
     val contactId: String = "",
     val name: String? = "",
     val email: String? = "",
@@ -38,7 +38,7 @@ data class Contact(
                 name
             }
             ContactInputType.Phone -> {
-                number.toString()
+                number?.toString()
             }
             else -> ""
         }

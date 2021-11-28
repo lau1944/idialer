@@ -1,5 +1,6 @@
 package com.vau.studio.iosstyle.idialer_phone.views.composable.contact_screen
 
+import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -14,6 +15,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -32,30 +34,55 @@ import com.vau.studio.iosstyle.idialer_phone.data.GET_ACCOUNT_PERMISSION
 import com.vau.studio.iosstyle.idialer_phone.data.models.Contact
 import com.vau.studio.iosstyle.idialer_phone.data.models.UiState
 import com.vau.studio.iosstyle.idialer_phone.views.composable.appColor
+import com.vau.studio.iosstyle.idialer_phone.views.composable.components.ContactAddView
 import com.vau.studio.iosstyle.idialer_phone.views.composable.components.DeniedLayout
 import com.vau.studio.iosstyle.idialer_phone.views.composable.components.UiProgressLayout
 import com.vau.studio.iosstyle.idialer_phone.views.composable.contact_detail_screen.CONTACT_DETAIL_ROUTE
+import com.vau.studio.iosstyle.idialer_phone.views.composable.contact_detail_screen.ShowContactCreateDialog
+import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.ContactDetailViewModel
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.ContactViewModel
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.MainViewModel
 import org.intellij.lang.annotations.JdkConstants
 
+@ExperimentalComposeUiApi
 @ExperimentalFoundationApi
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun ContactUi(
     contactViewModel: ContactViewModel,
+    contactDetailViewModel: ContactDetailViewModel,
     mainViewModel: MainViewModel
 ) {
+    var showAddDialog by remember {
+        mutableStateOf(false)
+    }
     val scrollState = rememberLazyListState()
     val contactPermissionsState = rememberMultiplePermissionsState(
         permissions = listOf(
             GET_ACCOUNT_PERMISSION
         )
     )
+    val createContactState by contactDetailViewModel.contactAddResultState.observeAsState()
+
+    if (createContactState is UiState.Success) {
+        contactViewModel.getContactNames()
+    }
+
+    if (showAddDialog) {
+        ShowContactCreateDialog(contactDetailViewModel = contactDetailViewModel, onDone = {
+            // insert new contact
+            contactDetailViewModel.createContact()
+            showAddDialog = false
+        }, onDismiss = {
+            showAddDialog = false
+        })
+    }
 
     Scaffold(
         topBar = {
-            ContactAppBar(scrollState, contactViewModel)
+            ContactAppBar(scrollState, contactViewModel, onAdd = {
+                showAddDialog = true
+            })
         },
     ) {
         Box(
