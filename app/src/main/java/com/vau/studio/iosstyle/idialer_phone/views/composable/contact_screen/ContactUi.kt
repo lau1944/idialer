@@ -161,7 +161,8 @@ private fun ContactList(
     scrollState: LazyListState,
     mainViewModel: MainViewModel
 ) {
-    val groupedContacts = contactNames.groupBy { it.name?.first().toString() }
+    val groupedContacts =
+        contactNames.groupBy { it.name?.first().toString() }
 
     LazyColumn(
         content = {
@@ -175,7 +176,7 @@ private fun ContactList(
                         mainViewModel.navigateTo(
                             route = CONTACT_DETAIL_ROUTE,
                             args = mapOf(
-                                "id" to contact.contactId,
+                                "id" to (contact.contactId ?: 0),
                                 "number" to contact.number.toString(),
                                 "prevName" to "Contact"
                             )

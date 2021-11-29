@@ -33,7 +33,7 @@ fun FavoriteItem(contact: Contact, onClick: (() -> Unit)? = null) {
     ) {
         Row {
             GlideImage(
-                imageUrl = contact.phoneUrl ?: "",
+                image = contact.phoneUrl ?: "",
                 modifier = Modifier.size(35.dp),
                 placeholder = ImageBitmap.imageResource(id = R.drawable.ic_user)
             )

@@ -87,8 +87,8 @@ class FavoriteViewModel @Inject constructor(
         }
     }
 
-    fun exist(id: String?) : Boolean {
-        if (id == null) return false
+    fun exist(id: Int?) : Boolean {
+        if (id == null || id == 0) return false
 
         if (_contactListState.value is UiState.Success) {
             val contacts = (_contactListState.value as UiState.Success<List<Contact>>).data
@@ -111,7 +111,7 @@ class FavoriteViewModel @Inject constructor(
             }
     }
 
-    private fun hasSameContact(contactId: String, contacts: List<Contact>): Boolean {
+    private fun hasSameContact(contactId: Int?, contacts: List<Contact>): Boolean {
         return contacts.any {
             it.contactId == contactId
         }

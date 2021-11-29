@@ -9,13 +9,13 @@ import com.skydoves.landscapist.glide.GlideImage
 
 @Composable
 fun GlideImage(
-    modifier: Modifier = Modifier.size(25.dp),
-    imageUrl: Any,
+    image: Any,
     scale: ContentScale? = ContentScale.Crop,
-    placeholder: Any? = null
+    placeholder: Any? = null,
+    modifier: Modifier = Modifier.size(25.dp),
 ) {
     GlideImage(
-        imageModel = imageUrl,
+        imageModel = image,
         contentScale = ContentScale.Crop,
         modifier = modifier,
         placeHolder = placeholder,

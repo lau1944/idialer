@@ -18,16 +18,10 @@ import androidx.core.database.getStringOrNull
 import com.vau.studio.iosstyle.idialer_phone.data.models.CallHistory
 import com.vau.studio.iosstyle.idialer_phone.data.models.Contact
 import contacts.async.commitAsync
-import contacts.core.Contacts
 import contacts.core.Fields.Contact
-import contacts.core.Insert
 import contacts.core.entities.MutableAddress
 import contacts.core.entities.MutableEmail
 import contacts.core.entities.MutableName
-import contacts.core.util.addAddress
-import contacts.core.util.addEmail
-import contacts.core.util.setName
-import contacts.core.util.setPhoto
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -36,6 +30,10 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
 import java.lang.Exception
 import java.lang.IllegalStateException
+import android.provider.ContactsContract.RawContacts
+import contacts.core.*
+import contacts.core.util.*
+
 
 /**
  * This repo contains methods to get phone related data asynchronously
@@ -50,7 +48,7 @@ object PhoneRepository {
     suspend fun createNewContact(
         @ApplicationContext context: Context,
         contact: Contact
-    ): Insert.Result {
+    ): Flow<Insert.Result> = flow {
         val insertResult = Contacts(context)
             .insert()
             .rawContact {
@@ -68,107 +66,139 @@ object PhoneRepository {
                     }
                 }
 
-                if (!contact.phoneUrl.isNullOrEmpty()) {
-                    try {
-                        val uri = Uri.parse(contact.phoneUrl)
-                        val bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                            ImageDecoder.decodeBitmap(
-                                ImageDecoder.createSource(
-                                    context.contentResolver,
-                                    uri
-                                )
-                            )
-                        } else {
-                            MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
-                        }
-                        setPhoto(
-                            context, bitmap
-                        )
-
-                    } catch (e: Exception) {
-                        Log.i(TAG, e.toString())
+                if (!contact.number.isNullOrEmpty()) {
+                    addPhone {
+                        this.number = contact.number
                     }
+                }
+
+                val photoBitmap = contact.getPhotoBitmap()
+                if (photoBitmap != null) {
+                    setPhoto(context, photoBitmap)
                 }
             }
             .allowBlanks(true)
-            .commitAsync(Dispatchers.IO).await()
-        return insertResult
-    }
+            .commit()
+        emit(insertResult)
+    }.flowOn(Dispatchers.IO)
 
     /**
      * Get all contacts
      */
     fun getContactNames(
         @ApplicationContext context: Context,
-        lookUp: String?
+        where: Where<AbstractDataField>?
     ): Flow<List<Contact>?> = flow {
 
-        val cursor = context.contentResolver.query(
-            ContactsContract.Data.CONTENT_URI,
-            arrayOf(
-                ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
-                ContactsContract.CommonDataKinds.Email.DATA,
-                ContactsContract.CommonDataKinds.Phone.NUMBER,
-                ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
-                ContactsContract.PhoneLookup.PHOTO_THUMBNAIL_URI,
-                ContactsContract.CommonDataKinds.StructuredPostal.DATA,
-                ContactsContract.CommonDataKinds.Phone.HAS_PHONE_NUMBER
-            ),
-            lookUp,
-            null,
-            ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC"
-        )
-        if (cursor != null) {
-            val contacts = mutableListOf<Contact>()
-            val contactIdSet: HashSet<String> = hashSetOf()
+        val queriedContacts = Contacts(context)
+            .query()
+            .include(
+                Fields.Contact.DisplayNamePrimary,
+                Fields.Contact.DisplayNameAlt,
+                Fields.Email.Address,
+                Fields.Contact.HasPhoneNumber,
+                Fields.Phone.Number,
+                Fields.Contact.Id,
+                Fields.Contact.PhotoUri,
+                Fields.Contact.PhotoThumbnailUri
+            )
+            .where(where)
+            .find()
 
-            try {
-                while (cursor.moveToNext()) {
-                    val nameIndex =
-                        cursor.getColumnIndex(
-                            ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
-                        )
-                    val emailIndex =
-                        cursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA)
-                    val numberIndex =
-                        cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)
-                    val idIndex =
-                        cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_ID)
-                    val phoneUrlIndex =
-                        cursor.getColumnIndex(ContactsContract.PhoneLookup.PHOTO_THUMBNAIL_URI)
-                    val postalIndex =
-                        cursor.getColumnIndex(ContactsContract.CommonDataKinds.StructuredPostal.DATA)
-                    val hasPhoneNumberIndex =
-                        cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.HAS_PHONE_NUMBER)
-                    val id = cursor.getString(idIndex)
-
-                    if (!contactIdSet.contains(id)) {
-                        contactIdSet.add(id)
-                        val hasPhoneNumber = cursor.getString(hasPhoneNumberIndex) != "0"
-                        contacts.add(
-                            Contact(
-                                name = cursor.getString(nameIndex),
-                                email = cursor.getString(emailIndex),
-                                number = if (hasPhoneNumber) cursor.getString(numberIndex) else "",
-                                contactId = id,
-                                phoneUrl = cursor.getString(phoneUrlIndex),
-                                postal = cursor.getString(postalIndex)
-                            )
-                        )
+        val contacts = arrayListOf<Contact>()
+        for (contact in queriedContacts) {
+            if (!contact.displayNamePrimary.isNullOrEmpty()) {
+                contacts.add(
+                    Contact(
+                        contactId = contact.id!!.toInt(),
+                        phoneUrl = contact.photoThumbnailUri.toString(),
+                        name = contact.displayNamePrimary ?: "unknown",
+                        number = if (contact.phoneList()
+                                .isNullOrEmpty()
+                        ) "" else contact.phoneList()[0].number,
+                        email = if (contact.emailList()
+                                .isNullOrEmpty()
+                        ) "" else contact.emailList()[0].address,
+                    ).apply {
+                        if (!this.phoneUrl.isNullOrEmpty()) {
+                            this.setPhotoBitmap(contact.photoThumbnailBitmap(context))
+                        }
                     }
-                }
-                emit(contacts)
-            } catch (e: Exception) {
-                Log.i(TAG, e.toString())
-                throw IllegalStateException(e)
-            } finally {
-                cursor.close()
-            }
-        } else {
-            withContext(Dispatchers.Default) {
-                emit(emptyList<Contact>())
+                )
+
             }
         }
+        emit(contacts)
+        /* val cursor = context.contentResolver.query(
+             ContactsContract.Data.CONTENT_URI,
+             arrayOf(
+                 ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
+                 ContactsContract.CommonDataKinds.Email.DATA,
+                 ContactsContract.CommonDataKinds.Phone.NUMBER,
+                 ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
+                 ContactsContract.Contacts.PHOTO_THUMBNAIL_URI,
+                 ContactsContract.CommonDataKinds.StructuredPostal.DATA,
+                 ContactsContract.CommonDataKinds.Phone.HAS_PHONE_NUMBER
+             ),
+             lookUp,
+             null,
+             ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC"
+         )
+         if (cursor != null) {
+             val contacts = mutableListOf<Contact>()
+             val contactIdSet: HashSet<String> = hashSetOf()
+
+             try {
+                 while (cursor.moveToNext()) {
+                     val nameIndex =
+                         cursor.getColumnIndex(
+                             ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
+                         )
+                     val emailIndex =
+                         cursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA)
+                     val numberIndex =
+                         cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)
+                     val idIndex =
+                         cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_ID)
+                     val phoneUrlIndex =
+                         cursor.getColumnIndex(ContactsContract.Contacts.PHOTO_THUMBNAIL_URI)
+                     val postalIndex =
+                         cursor.getColumnIndex(ContactsContract.CommonDataKinds.Photo.PHOTO_THUMBNAIL_URI)
+                     val hasPhoneNumberIndex =
+                         cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.HAS_PHONE_NUMBER)
+                     val id = cursor.getString(idIndex)
+
+                     val rawContactPhotoUri = Uri.withAppendedPath(
+                         ContentUris.withAppendedId(RawContacts.CONTENT_URI, id.toLong()),
+                         RawContacts.DisplayPhoto.CONTENT_DIRECTORY
+                     )
+                     if (!contactIdSet.contains(id)) {
+                         contactIdSet.add(id)
+                         val hasPhoneNumber = cursor.getString(hasPhoneNumberIndex) != "0"
+                         contacts.add(
+                             Contact(
+                                 name = cursor.getString(nameIndex),
+                                 email = cursor.getString(emailIndex),
+                                 number = if (hasPhoneNumber) cursor.getString(numberIndex) else "",
+                                 contactId = id,
+                                 phoneUrl = rawContactPhotoUri.toString(),
+                                 postal = cursor.getString(postalIndex)
+                             )
+                         )
+                     }
+                 }
+                 emit(contacts)
+             } catch (e: Exception) {
+                 Log.i(TAG, e.toString())
+                 throw IllegalStateException(e)
+             } finally {
+                 cursor.close()
+             }
+         } else {
+             withContext(Dispatchers.Default) {
+                 emit(emptyList<Contact>())
+             }
+         }*/
     }.flowOn(Dispatchers.IO)
 
     /**

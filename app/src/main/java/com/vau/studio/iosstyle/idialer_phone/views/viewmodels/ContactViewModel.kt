@@ -11,6 +11,8 @@ import androidx.lifecycle.viewModelScope
 import com.vau.studio.iosstyle.idialer_phone.data.models.Contact
 import com.vau.studio.iosstyle.idialer_phone.data.models.UiState
 import com.vau.studio.iosstyle.idialer_phone.data.repositories.PhoneRepository
+import contacts.core.AbstractDataField
+import contacts.core.Where
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -46,10 +48,10 @@ class ContactViewModel @Inject constructor(
      * Get all contacts
      */
     @SuppressLint("Recycle")
-    fun getContactNames(lookUp: String? = null) = viewModelScope.launch {
+    fun getContactNames(where: Where<AbstractDataField>? = null) = viewModelScope.launch {
         _queriedContactState.value = UiState.InProgress
 
-        phoneRepository.getContactNames(context, lookUp)
+        phoneRepository.getContactNames(context, where)
             .flowOn(Dispatchers.Default)
             .catch { e ->
                 println(e)
@@ -86,8 +88,8 @@ class ContactViewModel @Inject constructor(
     /**
      * Check if contact exist in the list
      */
-    fun existInContact(id: String?): Boolean {
-        if (id == null) return false
+    fun existInContact(id: Int?): Boolean {
+        if (id == null || id == 0) return false
 
         val contacts = _contactList.value
         return contacts?.any {

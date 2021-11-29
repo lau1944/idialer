@@ -3,6 +3,7 @@ package com.vau.studio.iosstyle.idialer_phone.views.viewmodels
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.animateDpAsState
 import androidx.lifecycle.LiveData
@@ -15,9 +16,12 @@ import com.vau.studio.iosstyle.idialer_phone.data.QUERY_LOG_BY_NUMBER
 import com.vau.studio.iosstyle.idialer_phone.data.models.Contact
 import com.vau.studio.iosstyle.idialer_phone.data.models.UiState
 import com.vau.studio.iosstyle.idialer_phone.data.repositories.PhoneRepository
+import contacts.core.Fields
+import contacts.core.equalTo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
@@ -48,12 +52,18 @@ class ContactDetailViewModel @Inject constructor(
 
         if (contact != null) {
             updateContactCreateState(UiState.InProgress)
-            val result = phoneRepository.createNewContact(context, contact = contact)
-            if (result.isSuccessful) {
-                updateContactCreateState(UiState.Success(null))
-            } else {
-                updateContactCreateState(UiState.Failed())
-            }
+            phoneRepository.createNewContact(context, contact = contact)
+                .flowOn(Dispatchers.Main)
+                .catch {
+                    Log.i("ContactDetailViewModel", this.toString())
+                }
+                .collect { result ->
+                    if (result.isSuccessful) {
+                        updateContactCreateState(UiState.Success(null))
+                    } else {
+                        updateContactCreateState(UiState.Failed())
+                    }
+                }
         }
         _newContact.value = Contact()
     }
@@ -66,8 +76,8 @@ class ContactDetailViewModel @Inject constructor(
         _newContact.value = contact
     }
 
-    fun getContactDetailById(id: String) = viewModelScope.launch {
-        phoneRepository.getContactNames(context, QUERY_CONTACT_BY_ID + id)
+    fun getContactDetailById(id: Int) = viewModelScope.launch {
+        phoneRepository.getContactNames(context, (Fields.Contact.Id equalTo id.toLong()))
             .flowOn(Dispatchers.Main)
             .collect { contacts ->
                 if (!contacts.isNullOrEmpty()) {
@@ -78,7 +88,7 @@ class ContactDetailViewModel @Inject constructor(
     }
 
     fun getContactDetailByNumber(number: String) = viewModelScope.launch {
-        phoneRepository.getContactNames(context, QUERY_CONTACT_BY_NUMBER + number)
+        phoneRepository.getContactNames(context, (Fields.Contact.DisplayNamePrimary equalTo number))
             .flowOn(Dispatchers.Main)
             .collect { contacts ->
                 if (!contacts.isNullOrEmpty()) {

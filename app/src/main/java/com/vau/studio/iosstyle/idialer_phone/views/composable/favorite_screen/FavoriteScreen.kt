@@ -73,7 +73,7 @@ fun FavoriteScreen(
                     mainViewModel.navigateTo(
                         route = CONTACT_DETAIL_ROUTE,
                         args = mapOf(
-                            "id" to it.contactId,
+                            "id" to (it.contactId ?: 0),
                             "number" to (it.number ?: ""),
                             "prevName" to "Favorite"
                         )

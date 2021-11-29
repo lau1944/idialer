@@ -132,13 +132,13 @@ fun ScreenContent(
             CONTACT_DETAIL_ROUTE + QUERY_PARAM_FIX, arguments = listOf(
                 navArgument("number")   { defaultValue = "" },
                 navArgument("prevName") { defaultValue = "" },
-                navArgument("id")       { defaultValue = "" }
+                navArgument("id")       { defaultValue = 0 }
             ),
         ) { entry ->
             ContactDetailUi(
                 number = entry.arguments?.getString("number") ?: "0",
                 preName = entry.arguments?.getString("prevName"),
-                id = entry.arguments?.getString("id"),
+                id = entry.arguments?.getInt("id"),
                 mainViewModel = mainViewModel,
                 contactViewModel = contactViewModel,
                 contactDetailViewModel = contactDetailViewModel,

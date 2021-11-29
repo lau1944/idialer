@@ -25,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vau.studio.iosstyle.idialer_phone.R
+import com.vau.studio.iosstyle.idialer_phone.core.BitmapUtils
 import com.vau.studio.iosstyle.idialer_phone.data.models.Contact
 import com.vau.studio.iosstyle.idialer_phone.data.models.ContactInputType
 import com.vau.studio.iosstyle.idialer_phone.views.composable.*
@@ -49,7 +50,7 @@ fun ContactAddView(
         mutableStateOf<ContactInputType?>(null)
     }
     val selectedPhoto = remember {
-        mutableStateOf<String?>(null)
+        mutableStateOf<Uri?>(null)
     }
 
     Box(
@@ -76,7 +77,10 @@ fun ContactAddView(
                 onAddPhoto = {
                     contactInputType.value = ContactInputType.Photo
                     selectedPhoto.value = it
-                    contactDetailViewModel.updateContact(contact!!.copy(phoneUrl = it))
+                    contactDetailViewModel.updateContact(
+                        contact!!.copy(phoneUrl = it.toString()).apply {
+                            this.setPhotoBitmap(BitmapUtils.uriToBitmap(context, it))
+                        })
                 },
                 onAdd = {
                     contactInputType.value = it
@@ -122,7 +126,7 @@ fun ContactAddView(
                         }
                     }
                     ContactInputType.Photo -> {
-                        contactDetailViewModel.updateContact(contact!!.copy(phoneUrl = selectedPhoto.value))
+                        contactDetailViewModel.updateContact(contact!!.copy(phoneUrl = selectedPhoto.value.toString()))
                     }
                 }
                 showInputDialog.value = false
@@ -161,7 +165,7 @@ private fun ContactEditList(
     contact: Contact,
     contactDetailViewModel: ContactDetailViewModel,
     onAdd: ((ContactInputType) -> Unit),
-    onAddPhoto: (String) -> Unit,
+    onAddPhoto: (Uri?) -> Unit,
     onRemoved: (ContactInputType) -> Unit,
 ) {
     LazyColumn(content = {
@@ -173,7 +177,7 @@ private fun ContactEditList(
             TextInfoSection(contact, contactDetailViewModel)
 
             // phone field
-            if (contact.number != null) {
+            if (!contact.number.isNullOrEmpty()) {
                 InfoRemoveView(
                     isClickable = isCardClickable,
                     hint = "phone",
@@ -241,7 +245,7 @@ private fun TextInfoSection(contact: Contact, contactDetailViewModel: ContactDet
 }
 
 @Composable
-private fun ContactEditAvatar(isClickable: Boolean, onAdd: (String) -> Unit) {
+private fun ContactEditAvatar(isClickable: Boolean, onAdd: (Uri?) -> Unit) {
     var imageUri by remember {
         mutableStateOf<Uri?>(null)
     }
@@ -251,7 +255,7 @@ private fun ContactEditAvatar(isClickable: Boolean, onAdd: (String) -> Unit) {
         ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         imageUri = uri
-        onAdd(imageUri.toString())
+        onAdd(imageUri)
     }
 
     Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
@@ -274,7 +278,7 @@ private fun ContactEditAvatar(isClickable: Boolean, onAdd: (String) -> Unit) {
                 )
             } else {
                 GlideImage(
-                    imageUrl = imageUri!!,
+                    image = imageUri!!,
                     modifier = Modifier
                         .size(75.dp)
                         .clip(CircleShape)

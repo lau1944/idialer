@@ -2,23 +2,17 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "3b0024685fc4aa7aa974be44c21cfab9",
+    "identityHash": "1cb215717d4cc9588224128f2dd0812a",
     "entities": [
       {
         "tableName": "Contact",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`primaryId` INTEGER PRIMARY KEY AUTOINCREMENT, `contactId` TEXT NOT NULL, `number` TEXT, `name` TEXT, `email` TEXT, `phoneUrl` TEXT, `postal` TEXT, `type` INTEGER, `callDate` TEXT, `duration` TEXT, `location` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`contactId` INTEGER PRIMARY KEY AUTOINCREMENT, `number` TEXT, `name` TEXT, `email` TEXT, `phoneUrl` TEXT, `postal` TEXT, `type` INTEGER, `callDate` TEXT, `duration` TEXT, `location` TEXT)",
         "fields": [
-          {
-            "fieldPath": "primaryId",
-            "columnName": "primaryId",
-            "affinity": "INTEGER",
-            "notNull": false
-          },
           {
             "fieldPath": "contactId",
             "columnName": "contactId",
-            "affinity": "TEXT",
-            "notNull": true
+            "affinity": "INTEGER",
+            "notNull": false
           },
           {
             "fieldPath": "number",
@@ -77,7 +71,7 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "primaryId"
+            "contactId"
           ],
           "autoGenerate": true
         },
@@ -88,7 +82,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3b0024685fc4aa7aa974be44c21cfab9')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '1cb215717d4cc9588224128f2dd0812a')"
     ]
   }
 }

@@ -1,7 +1,6 @@
 package com.vau.studio.iosstyle.idialer_phone.views.composable.contact_detail_screen
 
 import android.content.Context
-import android.net.Uri
 import android.os.Build
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -58,7 +57,7 @@ const val QUERY_PARAM_FIX = "?number={number}&prevName={prevName}&id={id}"
 fun ContactDetailUi(
     preName: String? = "",
     number: String,
-    id: String? = "",
+    id: Int? = 0,
     mainViewModel: MainViewModel,
     contactViewModel: ContactViewModel,
     contactDetailViewModel: ContactDetailViewModel,
@@ -243,9 +242,9 @@ private fun UserInfoView(contact: Contact) {
             .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        if (!contact.phoneUrl.isNullOrEmpty()) {
+        if (contact.getPhotoBitmap() != null) {
             GlideImage(
-                imageUrl = Uri.parse(contact.phoneUrl),
+                contact.getPhotoBitmap()!!,
                 modifier = Modifier
                     .size(75.dp)
                     .clip(CircleShape)
