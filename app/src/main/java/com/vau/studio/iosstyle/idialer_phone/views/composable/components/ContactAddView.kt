@@ -78,7 +78,7 @@ fun ContactAddView(
                     contactInputType.value = ContactInputType.Photo
                     selectedPhoto.value = it
                     contactDetailViewModel.updateContact(
-                        contact!!.copy(phoneUrl = it.toString()).apply {
+                        contact!!.clone(phoneUrl = it.toString()).apply {
                             this.setPhotoBitmap(BitmapUtils.uriToBitmap(context, it))
                         })
                 },
@@ -103,17 +103,17 @@ fun ContactAddView(
             onConfirm = {
                 when (contactInputType.value) {
                     ContactInputType.Address -> {
-                        contactDetailViewModel.updateContact(contact = contact!!.copy(location = it))
+                        contactDetailViewModel.updateContact(contact = contact!!.clone(location = it))
                     }
                     ContactInputType.Mail -> {
-                        contactDetailViewModel.updateContact(contact = contact!!.copy(email = it))
+                        contactDetailViewModel.updateContact(contact = contact!!.clone(email = it))
                     }
                     ContactInputType.Name -> {
-                        contactDetailViewModel.updateContact(contact = contact!!.copy(name = it))
+                        contactDetailViewModel.updateContact(contact = contact!!.clone(name = it))
                     }
                     ContactInputType.Phone -> {
                         try {
-                            contactDetailViewModel.updateContact(contact = contact!!.copy(number = it))
+                            contactDetailViewModel.updateContact(contact = contact!!.clone(number = it))
                         } catch (e: NumberFormatException) {
                             Toast.makeText(
                                 context,
@@ -126,7 +126,7 @@ fun ContactAddView(
                         }
                     }
                     ContactInputType.Photo -> {
-                        contactDetailViewModel.updateContact(contact!!.copy(phoneUrl = selectedPhoto.value.toString()))
+                        contactDetailViewModel.updateContact(contact!!.clone(phoneUrl = selectedPhoto.value.toString()))
                     }
                 }
                 showInputDialog.value = false
@@ -141,19 +141,19 @@ private fun removeInfo(
 ) {
     when (contactInputType) {
         ContactInputType.Address -> {
-            contactDetailViewModel.updateContact(contact = contact.copy(location = null))
+            contactDetailViewModel.updateContact(contact = contact.clone(location = null))
         }
         ContactInputType.Mail -> {
-            contactDetailViewModel.updateContact(contact = contact.copy(email = null))
+            contactDetailViewModel.updateContact(contact = contact.clone(email = null))
         }
         ContactInputType.Name -> {
-            contactDetailViewModel.updateContact(contact = contact.copy(name = null))
+            contactDetailViewModel.updateContact(contact = contact.clone(name = null))
         }
         ContactInputType.Phone -> {
-            contactDetailViewModel.updateContact(contact = contact.copy(number = ""))
+            contactDetailViewModel.updateContact(contact = contact.clone(number = ""))
         }
         ContactInputType.Photo -> {
-            contactDetailViewModel.updateContact(contact = contact.copy(phoneUrl = null))
+            contactDetailViewModel.updateContact(contact = contact.clone(phoneUrl = null))
         }
     }
 }
@@ -237,7 +237,7 @@ private fun TextInfoSection(contact: Contact, contactDetailViewModel: ContactDet
     Column(modifier = Modifier.padding(vertical = 15.dp)) {
         EditView {
             StandardEditText(value = contact.name ?: "", hint = "Name", onChange = { text ->
-                val newContact = contact.copy(name = text)
+                val newContact = contact.clone(name = text)
                 contactDetailViewModel.updateContact(contact = newContact)
             })
         }

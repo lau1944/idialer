@@ -55,15 +55,11 @@ object PhoneRepository {
                 setName {
                     this.displayName = contact.name
                 }
-                if (!contact.email.isNullOrEmpty()) {
-                    addEmail {
-                        this.address = contact.email
-                    }
+                addEmail {
+                    this.address = contact.email
                 }
-                if (!contact.location.isNullOrEmpty()) {
-                    addAddress {
-                        this.formattedAddress = contact.location
-                    }
+                addAddress {
+                    this.formattedAddress = contact.location
                 }
 
                 if (!contact.number.isNullOrEmpty()) {
@@ -71,14 +67,14 @@ object PhoneRepository {
                         this.number = contact.number
                     }
                 }
-
-                val photoBitmap = contact.getPhotoBitmap()
-                if (photoBitmap != null) {
-                    setPhoto(context, photoBitmap)
-                }
             }
             .allowBlanks(true)
             .commit()
+
+        val photoBitmap = contact.getPhotoBitmap()
+        if (photoBitmap != null) {
+            insertResult.contacts(context = context).firstOrNull()?.setPhoto(context, photoBitmap)
+        }
         emit(insertResult)
     }.flowOn(Dispatchers.IO)
 
