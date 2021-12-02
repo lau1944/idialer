@@ -19,9 +19,6 @@ import com.vau.studio.iosstyle.idialer_phone.data.models.CallHistory
 import com.vau.studio.iosstyle.idialer_phone.data.models.Contact
 import contacts.async.commitAsync
 import contacts.core.Fields.Contact
-import contacts.core.entities.MutableAddress
-import contacts.core.entities.MutableEmail
-import contacts.core.entities.MutableName
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -31,8 +28,11 @@ import kotlinx.coroutines.withContext
 import java.lang.Exception
 import java.lang.IllegalStateException
 import android.provider.ContactsContract.RawContacts
+import com.vau.studio.iosstyle.idialer_phone.data.models.UiState
 import contacts.core.*
+import contacts.core.entities.*
 import contacts.core.util.*
+import contacts.core.entities.RawContact as RawContact
 
 
 /**
@@ -76,6 +76,42 @@ object PhoneRepository {
             insertResult.contacts(context = context).firstOrNull()?.setPhoto(context, photoBitmap)
         }
         emit(insertResult)
+    }.flowOn(Dispatchers.IO)
+
+    /**
+     * Delete contact by id
+     */
+    fun deleteContactById(context: Context, contactId: String): Flow<UiState<*>> = flow {
+        val cursor = context.contentResolver.query(
+            ContactsContract.Data.CONTENT_URI,
+            null,
+            null,
+            null,
+            null
+        )
+        try {
+            while (cursor!!.moveToNext()) {
+                val idIndex =
+                    cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_ID)
+                if (cursor.getString(idIndex).equals(contactId)) {
+                    val keyIndex =
+                        cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.LOOKUP_KEY)
+                    val lookupKey =
+                        cursor.getString(keyIndex)
+                    val uri = Uri.withAppendedPath(
+                        ContactsContract.Contacts.CONTENT_LOOKUP_URI,
+                        lookupKey
+                    )
+                    context.contentResolver.delete(uri, null, null)
+                }
+            }
+            emit(UiState.Success<Nothing>())
+        } catch (e: Exception) {
+            Log.i(TAG, e.toString())
+            emit(UiState.Failed(e))
+        } finally {
+            cursor?.close()
+        }
     }.flowOn(Dispatchers.IO)
 
     /**

@@ -43,6 +43,10 @@ class ContactDetailViewModel @Inject constructor(
     private val _contactAddResultState = MutableLiveData<UiState<Contact>>(UiState.InIdle)
     val contactAddResultState: LiveData<UiState<Contact>> get() = _contactAddResultState
 
+    private val _contactDeleteState = MutableLiveData<UiState<Any>>(UiState.InIdle)
+    val contactDeleteState: LiveData<UiState<Any>> get() = _contactDeleteState
+
+
     init {
         initState()
     }
@@ -66,6 +70,14 @@ class ContactDetailViewModel @Inject constructor(
                 }
         }
         _newContact.value = Contact()
+    }
+
+    fun deleteContact(contactId: String) = viewModelScope.launch {
+        phoneRepository.deleteContactById(context, contactId)
+            .flowOn(Dispatchers.Main)
+            .collect {
+                _contactDeleteState.value = it
+            }
     }
 
     fun updateContactCreateState(state: UiState<Contact>) {
