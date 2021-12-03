@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @SuppressLint("StaticFieldLeak")
@@ -57,15 +58,16 @@ class ContactDetailViewModel @Inject constructor(
         if (contact != null) {
             updateContactCreateState(UiState.InProgress)
             phoneRepository.createNewContact(context, contact = contact)
-                .flowOn(Dispatchers.Main)
                 .catch {
                     Log.i("ContactDetailViewModel", this.toString())
                 }
                 .collect { result ->
-                    if (result.isSuccessful) {
-                        updateContactCreateState(UiState.Success(null))
-                    } else {
-                        updateContactCreateState(UiState.Failed())
+                    withContext(Dispatchers.Main) {
+                        if (result.isSuccessful) {
+                            updateContactCreateState(UiState.Success(null))
+                        } else {
+                            updateContactCreateState(UiState.Failed())
+                        }
                     }
                 }
         }
@@ -74,9 +76,10 @@ class ContactDetailViewModel @Inject constructor(
 
     fun deleteContact(contactId: String) = viewModelScope.launch {
         phoneRepository.deleteContactById(context, contactId)
-            .flowOn(Dispatchers.Main)
             .collect {
-                _contactDeleteState.value = it
+                withContext(Dispatchers.Main) {
+                    _contactDeleteState.value = it
+                }
             }
     }
 
@@ -90,33 +93,36 @@ class ContactDetailViewModel @Inject constructor(
 
     fun getContactDetailById(id: Int) = viewModelScope.launch {
         phoneRepository.getContactNames(context, (Fields.Contact.Id equalTo id.toLong()))
-            .flowOn(Dispatchers.Main)
             .collect { contacts ->
-                if (!contacts.isNullOrEmpty()) {
-                    _contactDetail.value = UiState.Success(contacts.first())
-                    //updateContact(contacts.first())
+                withContext(Dispatchers.Main) {
+                    if (!contacts.isNullOrEmpty()) {
+                        _contactDetail.value = UiState.Success(contacts.first())
+                        //updateContact(contacts.first())
+                    }
                 }
             }
     }
 
     fun getContactDetailByNumber(number: String) = viewModelScope.launch {
         phoneRepository.getContactNames(context, (Fields.Contact.DisplayNamePrimary equalTo number))
-            .flowOn(Dispatchers.Main)
             .collect { contacts ->
-                if (!contacts.isNullOrEmpty()) {
-                    _contactDetail.value = UiState.Success(contacts.first())
-                    //updateContact(contacts.first())
+                withContext(Dispatchers.Main) {
+                    if (!contacts.isNullOrEmpty()) {
+                        _contactDetail.value = UiState.Success(contacts.first())
+                        //updateContact(contacts.first())
+                    }
                 }
             }
     }
 
     fun getCallLogByNumber(number: String) = viewModelScope.launch {
         phoneRepository.getCallLog(context, null, QUERY_LOG_BY_NUMBER + number)
-            .flowOn(Dispatchers.Main)
             .collect { contacts ->
-                if (!contacts.isNullOrEmpty()) {
-                    _contactDetail.value = UiState.Success(contacts.first())
-                    //updateContact(contacts.first())
+                withContext(Dispatchers.Main) {
+                    if (!contacts.isNullOrEmpty()) {
+                        _contactDetail.value = UiState.Success(contacts.first())
+                        //updateContact(contacts.first())
+                    }
                 }
             }
     }

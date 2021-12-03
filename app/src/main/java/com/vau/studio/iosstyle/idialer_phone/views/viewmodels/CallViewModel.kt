@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -94,15 +95,18 @@ class CallViewModel @Inject constructor(
                 CallLog.Calls.DURATION
             )
         )
-            .flowOn(Dispatchers.Default)
             .catch { e ->
-                Log.i(TAG, e.toString())
-                _callLogState.value = UiState.Failed(e)
+                withContext(Dispatchers.Main) {
+                    Log.i(TAG, e.toString())
+                    _callLogState.value = UiState.Failed(e)
+                }
             }
             .collect { histories ->
-                if (histories != null) {
-                    _callLogState.value = UiState.Success(data = histories)
-                    callHistories = histories
+                withContext(Dispatchers.Main) {
+                    if (histories != null) {
+                        _callLogState.value = UiState.Success(data = histories)
+                        callHistories = histories
+                    }
                 }
             }
     }

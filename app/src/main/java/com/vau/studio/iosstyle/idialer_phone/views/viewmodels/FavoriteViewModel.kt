@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -101,13 +102,17 @@ class FavoriteViewModel @Inject constructor(
     }
 
     private fun getAllFavorites() = viewModelScope.launch {
-        favoriteRepository.getAllFavorite().flowOn(Dispatchers.Default)
+        favoriteRepository.getAllFavorite()
             .catch { e ->
-                Log.i(TAG, e.toString())
-                _contactListState.value = UiState.Failed(exception = e)
+                withContext(Dispatchers.Main) {
+                    Log.i(TAG, e.toString())
+                    _contactListState.value = UiState.Failed(exception = e)
+                }
             }
             .collect { contacts ->
-                _contactListState.value = UiState.Success(contacts)
+                withContext(Dispatchers.Main) {
+                    _contactListState.value = UiState.Success(contacts)
+                }
             }
     }
 

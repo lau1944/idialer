@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -52,17 +53,19 @@ class ContactViewModel @Inject constructor(
         _queriedContactState.value = UiState.InProgress
 
         phoneRepository.getContactNames(context, where)
-            .flowOn(Dispatchers.Default)
             .catch { e ->
-                println(e)
-                _queriedContactState.value = UiState.Failed(e)
+               withContext(Dispatchers.Main) {
+                   _queriedContactState.value = UiState.Failed(e)
+               }
             }
             .collect { contacts ->
-                if (contacts != null) {
-                    _contactList.value = contacts
-                    _queriedContactState.value = UiState.Success(contacts)
-                } else {
-                    _queriedContactState.value = UiState.Failed()
+                withContext(Dispatchers.Main) {
+                    if (contacts != null) {
+                        _contactList.value = contacts
+                        _queriedContactState.value = UiState.Success(contacts)
+                    } else {
+                        _queriedContactState.value = UiState.Failed()
+                    }
                 }
             }
     }
@@ -104,9 +107,10 @@ class ContactViewModel @Inject constructor(
     fun getBlockNumbers() = viewModelScope.launch {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             phoneRepository.getBlockNumber(context)
-                .flowOn(Dispatchers.Main)
                 .collect { numbers ->
-                    _blockNumbers.value = numbers
+                   withContext(Dispatchers.Main) {
+                       _blockNumbers.value = numbers
+                   }
                 }
         }
     }
