@@ -339,11 +339,15 @@ object PhoneRepository {
         number: String
     ) {
         val contentValue = ContentValues()
-        contentValue.put(BlockedNumberContract.BlockedNumbers.COLUMN_ORIGINAL_NUMBER, number)
-        context.contentResolver.insert(
-            BlockedNumberContract.BlockedNumbers.CONTENT_URI,
-            contentValue
-        )
+        try {
+            contentValue.put(BlockedNumberContract.BlockedNumbers.COLUMN_ORIGINAL_NUMBER, number)
+            context.contentResolver.insert(
+                BlockedNumberContract.BlockedNumbers.CONTENT_URI,
+                contentValue
+            )
+        } catch (e: Exception) {
+            Log.i(TAG, e.toString())
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.N)
@@ -352,11 +356,15 @@ object PhoneRepository {
         number: String
     ) {
         val contentValue = ContentValues()
-        contentValue.put(BlockedNumberContract.BlockedNumbers.COLUMN_ORIGINAL_NUMBER, number)
-        val uri = context.contentResolver.insert(
-            BlockedNumberContract.BlockedNumbers.CONTENT_URI,
-            contentValue
-        )
-        context.contentResolver.delete(uri!!, null, null)
+        try {
+            contentValue.put(BlockedNumberContract.BlockedNumbers.COLUMN_ORIGINAL_NUMBER, number)
+            val uri = context.contentResolver.insert(
+                BlockedNumberContract.BlockedNumbers.CONTENT_URI,
+                contentValue
+            )
+            context.contentResolver.delete(uri!!, null, null)
+        } catch (e: Exception) {
+            Log.i(TAG, e.toString())
+        }
     }
 }

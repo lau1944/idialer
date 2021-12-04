@@ -36,11 +36,10 @@ import com.vau.studio.iosstyle.idialer_phone.data.INCOMING_CALL_TYPE
 import com.vau.studio.iosstyle.idialer_phone.data.MISSED_CALL_TYPE
 import com.vau.studio.iosstyle.idialer_phone.data.OUTGOING_CALL_TYPE
 import com.vau.studio.iosstyle.idialer_phone.data.models.Contact
-import com.vau.studio.iosstyle.idialer_phone.data.models.ContactPageType
 import com.vau.studio.iosstyle.idialer_phone.data.models.UiState
 import com.vau.studio.iosstyle.idialer_phone.views.composable.*
 import com.vau.studio.iosstyle.idialer_phone.views.composable.components.AssetImage
-import com.vau.studio.iosstyle.idialer_phone.views.composable.components.ContactAddView
+import com.vau.studio.iosstyle.idialer_phone.views.composable.components.ContactModifyView
 import com.vau.studio.iosstyle.idialer_phone.views.composable.components.GlideImage
 import com.vau.studio.iosstyle.idialer_phone.views.composable.components.UiProgressLayout
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.ContactDetailViewModel
@@ -52,6 +51,7 @@ import java.util.*
 const val CONTACT_DETAIL_ROUTE = "contact_detail"
 const val QUERY_PARAM_FIX = "?number={number}&prevName={prevName}&id={id}"
 
+@RequiresApi(Build.VERSION_CODES.N)
 @ExperimentalComposeUiApi
 @Composable
 fun ContactDetailUi(
@@ -78,9 +78,11 @@ fun ContactDetailUi(
 
     Scaffold(
         topBar = {
-            DetailAppbar(prevName = preName!!, backgroundColor = backgroundColor) {
+            DetailAppbar(prevName = preName!!, backgroundColor = backgroundColor, onEdit = {
+
+            }, onBack = {
                 mainViewModel.popBack()
-            }
+            })
         },
         backgroundColor = backgroundColor
     ) {
@@ -158,6 +160,12 @@ fun ContactDetailUi(
                             ToastUtil.make(context, "Contact has added to your favorites")
                         })
 
+                    if (contact.number != null) {
+                        BlockContactView {
+                            contactViewModel.addBlockNumber(contact.number)
+                        }
+                    }
+
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isDefaultDialer)
                         BlockContactView(number = contact.number.toString(), contactViewModel)
                 }
@@ -202,7 +210,7 @@ fun ShowContactCreateDialog(
         onDismissRequest = { onDismiss() },
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
-        ContactAddView(
+        ContactModifyView(
             contactDetailViewModel = contactDetailViewModel,
             onCancel = { onDismiss() }) {
             onDone()
@@ -503,6 +511,46 @@ private fun ContactActionView(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun BlockContactView(onBlocked: () -> Unit) {
+    InfoViewHolder(
+        modifier = Modifier.padding(vertical = 45.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(iosGray.copy(0.1f))
+                .clip(RoundedCornerShape(15.dp))
+                .clickable {
+                    onBlocked()
+                }
+                .padding(vertical = 16.dp), contentAlignment = Alignment.Center
+        ) {
+            Text("Block this number", style = TextStyle(color = iosRed))
+        }
+    }
+}
+
+@Composable
+private fun DeleteContactView(onDeleted: () -> Unit) {
+    InfoViewHolder(
+        modifier = Modifier.padding(vertical = 45.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(iosGray.copy(0.1f))
+                .clip(RoundedCornerShape(15.dp))
+                .clickable {
+                    onDeleted()
+                }
+                .padding(vertical = 16.dp), contentAlignment = Alignment.Center
+        ) {
+            Text("Delete Contact", style = TextStyle(color = iosRed))
         }
     }
 }

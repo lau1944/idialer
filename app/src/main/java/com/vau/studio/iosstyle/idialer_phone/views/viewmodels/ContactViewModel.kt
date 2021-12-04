@@ -115,10 +115,11 @@ class ContactViewModel @Inject constructor(
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.N)
     fun addBlockNumber(number: String) = viewModelScope.launch {
-        phoneRepository.addBlockNumber(context, number)
-        updateBlockList(number, true)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            phoneRepository.addBlockNumber(context, number)
+            updateBlockList(number, true)
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.N)

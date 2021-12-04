@@ -33,9 +33,16 @@ import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.ContactDetailViewM
 import java.lang.Exception
 import java.lang.NumberFormatException
 
+/**
+ * Contact edit/add page
+ *
+ * @isUpdate show if the dialog is for updating the contact info
+ */
+
 @ExperimentalComposeUiApi
 @Composable
-fun ContactAddView(
+fun ContactModifyView(
+    isUpdate: Boolean = false,
     contactDetailViewModel: ContactDetailViewModel,
     onCancel: () -> Unit,
     onDone: () -> Unit

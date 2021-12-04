@@ -17,7 +17,7 @@ import com.vau.studio.iosstyle.idialer_phone.views.composable.components.AssetIm
 import com.vau.studio.iosstyle.idialer_phone.views.composable.iosBlue
 
 @Composable
-fun DetailAppbar(prevName: String, backgroundColor: Color, onBack: () -> Unit) {
+fun DetailAppbar(prevName: String, backgroundColor: Color, onEdit: () -> Unit, onBack: () -> Unit) {
     TopAppBar(
         backgroundColor = backgroundColor,
         elevation = 0.dp,
@@ -28,15 +28,31 @@ fun DetailAppbar(prevName: String, backgroundColor: Color, onBack: () -> Unit) {
             contentAlignment = Alignment.CenterStart
         ) {
             Row(
-                modifier = Modifier.clickable {
-                    onBack()
-                }
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                AssetImage(res = R.drawable.ic_back, size = 20, color = iosBlue)
-                Box(modifier = Modifier.padding(horizontal = 8.dp)) {
-                    Text(prevName, style = TextStyle(color = iosBlue, fontSize = 16.sp))
+                Row(
+                    modifier = Modifier
+                        .padding(12.dp)
+                        .clickable {
+                            onBack()
+                        }
+                ) {
+                    AssetImage(res = R.drawable.ic_back, size = 20, color = iosBlue)
+                    Box(modifier = Modifier.padding(horizontal = 8.dp)) {
+                        Text(prevName, style = TextStyle(color = iosBlue, fontSize = 16.sp))
+                    }
                 }
 
+                Box(
+                    modifier = Modifier
+                        .padding(12.dp)
+                        .clickable {
+                            onEdit()
+                        }
+                ) {
+                    Text("Edit", style = TextStyle(color = iosBlue, fontSize = 16.sp))
+                }
             }
         }
     }
