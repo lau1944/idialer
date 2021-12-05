@@ -5,6 +5,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
@@ -18,8 +21,13 @@ import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.FavoriteViewModel
 @Composable
 fun FavoriteAppbar(
     favoriteViewModel: FavoriteViewModel,
+    onEdit: (Boolean) -> Unit,
     onAdded: () -> Unit
 ) {
+    val (isEdit, setEditMode) = remember {
+        mutableStateOf<Boolean>(false)
+    }
+
     TopAppBar(
         backgroundColor = appColor().background,
         elevation = 0.dp,
@@ -38,8 +46,12 @@ fun FavoriteAppbar(
                 style = TextStyle(color = appColor().surface, fontSize = 16.sp)
             )
             Text(
-                text = "Edit",
-                style = TextStyle(color = iosBlue, fontSize = 16.sp)
+                text = if (isEdit) "Done" else "Edit",
+                style = TextStyle(color = iosBlue, fontSize = 16.sp),
+                modifier = Modifier.clickable {
+                    setEditMode(!isEdit)
+                    onEdit(!isEdit)
+                }
             )
         }
     }

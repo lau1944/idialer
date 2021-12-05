@@ -23,9 +23,6 @@ import com.vau.studio.iosstyle.idialer_phone.views.composable.iosGray
 fun FavoriteItem(contact: Contact, onClick: (() -> Unit)? = null) {
     Box(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(10.dp)
-            .height(75.dp)
             .clickable {
                 onClick?.invoke()
             }

@@ -63,6 +63,7 @@ class CallViewModel @Inject constructor(
             if (callLog == null) {
                 (callHistories as ArrayList<Contact>).clear()
             } else {
+                phoneRepository.deleteCallLog(context, callLog.callDate)
                 (callHistories as ArrayList<Contact>).remove(callLog)
             }
             val temperList = mutableListOf<Contact>().apply {
