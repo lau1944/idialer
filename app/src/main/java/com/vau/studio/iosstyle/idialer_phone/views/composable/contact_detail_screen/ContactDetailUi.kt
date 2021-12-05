@@ -75,6 +75,7 @@ fun ContactDetailUi(
     val contactCreateState by contactDetailViewModel.contactAddResultState.observeAsState()
     val contactDetailState by contactDetailViewModel.contactDetail.observeAsState()
     val contactUpdateState by contactDetailViewModel.contactUpdateState.observeAsState(initial = UiState.InIdle)
+    val contactDeleteState by contactDetailViewModel.contactDeleteState.observeAsState(UiState.InIdle)
 
     val isFavorite = remember {
         mutableStateOf(favoriteViewModel.exist(id))
@@ -191,6 +192,10 @@ fun ContactDetailUi(
         ContactModifyView(
             isUpdate = true,
             contactDetailViewModel = contactDetailViewModel,
+            onDeleted = {
+                isEdit = false
+                contactDetailViewModel.deleteContact(contact.contactId.toString())
+            },
             onCancel = { isEdit = false }) {
             isEdit = false
             contactDetailViewModel.updateContact()
@@ -198,6 +203,36 @@ fun ContactDetailUi(
     }
 
     ContactUpdateView(context, state = contactUpdateState)
+
+    if (contactDeleteState is UiState.Success) {
+        LaunchedEffect(key1 = true, block = {
+            contactDetailViewModel.initState()
+            mainViewModel.popBack()
+        })
+    }
+
+    ContactDeleteView(context, state = contactDeleteState)
+}
+
+@Composable
+private fun ContactDeleteView(context: Context, state: UiState<*>) {
+    when (state) {
+        is UiState.InProgress -> {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(iosGray.copy(0.3f))
+                    .clickable(enabled = false, onClick = {}),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+        is UiState.Failed -> {
+            ToastUtil.make(context, " Contact Deleted Failed, please try that again ")
+        }
+        else -> Box {}
+    }
 }
 
 @Composable
@@ -207,7 +242,8 @@ private fun ContactUpdateView(context: Context, state: UiState<*>) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(iosGray.copy(0.3f)),
+                    .background(iosGray.copy(0.3f))
+                    .clickable(enabled = false, onClick = {}),
                 contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator()

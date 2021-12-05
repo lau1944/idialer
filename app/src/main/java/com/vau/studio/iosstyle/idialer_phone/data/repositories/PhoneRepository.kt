@@ -108,6 +108,10 @@ object PhoneRepository {
                         this.number = contact.number
                     }
                 }
+
+                if (contact.getPhotoBitmap() != null) {
+                    setPhoto(context, contact.getPhotoBitmap()!!)
+                }
             })
             .commit()
         emit(result)
@@ -139,6 +143,7 @@ object PhoneRepository {
                         lookupKey
                     )
                     context.contentResolver.delete(uri, null, null)
+                    break
                 }
             }
             emit(UiState.Success<Nothing>())

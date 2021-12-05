@@ -45,6 +45,7 @@ fun ContactModifyView(
     isUpdate: Boolean = false,
     contactDetailViewModel: ContactDetailViewModel,
     onCancel: () -> Unit,
+    onDeleted: (() -> Unit)? = null,
     onDone: () -> Unit
 ) {
     val context = LocalContext.current
@@ -81,7 +82,10 @@ fun ContactModifyView(
                 }
             })
             ContactEditList(
-                !showInputDialog.value, contact = contact!!, contactDetailViewModel,
+                isUpdate = isUpdate,
+                !showInputDialog.value,
+                contact = contact!!,
+                contactDetailViewModel,
                 onAddPhoto = {
                     contactInputType.value = ContactInputType.Photo
                     selectedPhoto.value = it
@@ -89,6 +93,9 @@ fun ContactModifyView(
                         contact!!.clone(phoneUrl = it.toString()).apply {
                             this.setPhotoBitmap(BitmapUtils.uriToBitmap(context, it))
                         })
+                },
+                onDeleted = {
+                    onDeleted?.invoke()
                 },
                 onAdd = {
                     contactInputType.value = it
@@ -169,16 +176,18 @@ private fun removeInfo(
 @ExperimentalComposeUiApi
 @Composable
 private fun ContactEditList(
+    isUpdate: Boolean,
     isCardClickable: Boolean,
     contact: Contact,
     contactDetailViewModel: ContactDetailViewModel,
     onAdd: ((ContactInputType) -> Unit),
+    onDeleted: (() -> Unit)? = null,
     onAddPhoto: (Uri?) -> Unit,
     onRemoved: (ContactInputType) -> Unit,
 ) {
     LazyColumn(content = {
         item {
-            ContactEditAvatar(isCardClickable, onAdd = {
+            ContactEditAvatar(contact, isCardClickable, onAdd = {
                 onAddPhoto(it)
             })
 
@@ -235,8 +244,29 @@ private fun ContactEditList(
                     onAdd(ContactInputType.Address)
                 })
             }
+            if (isUpdate) {
+                DeleteContactView {
+                    onDeleted?.invoke()
+                }
+            }
         }
     })
+}
+
+@Composable
+private fun DeleteContactView(onDeleted: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 45.dp)
+            .background(iosWhite)
+            .clickable {
+                onDeleted()
+            }
+            .padding(vertical = 15.dp, horizontal = 18.dp), contentAlignment = Alignment.CenterStart
+    ) {
+        Text("Delete Contact", style = TextStyle(color = iosRed, fontSize = 14.sp))
+    }
 }
 
 @ExperimentalComposeUiApi
@@ -253,7 +283,7 @@ private fun TextInfoSection(contact: Contact, contactDetailViewModel: ContactDet
 }
 
 @Composable
-private fun ContactEditAvatar(isClickable: Boolean, onAdd: (Uri?) -> Unit) {
+private fun ContactEditAvatar(contact: Contact, isClickable: Boolean, onAdd: (Uri?) -> Unit) {
     var imageUri by remember {
         mutableStateOf<Uri?>(null)
     }
@@ -278,12 +308,21 @@ private fun ContactEditAvatar(isClickable: Boolean, onAdd: (Uri?) -> Unit) {
             )
         ) {
             if (imageUri == null) {
-                AssetImage(
-                    res = R.drawable.ic_big_user,
-                    size = 75,
-                    modifier = Modifier
-                        .padding(vertical = 10.dp)
-                )
+                if (contact.getPhotoBitmap() != null) {
+                    GlideImage(
+                        contact.getPhotoBitmap()!!,
+                        modifier = Modifier
+                            .size(75.dp)
+                            .clip(CircleShape)
+                    )
+                } else {
+                    AssetImage(
+                        res = R.drawable.ic_big_user,
+                        size = 75,
+                        modifier = Modifier
+                            .padding(vertical = 10.dp)
+                    )
+                }
             } else {
                 GlideImage(
                     image = imageUri!!,
