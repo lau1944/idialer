@@ -64,11 +64,12 @@ fun ContactModifyView(
         Modifier
             .background(backgroundGray)
             .fillMaxSize()
+            .clickable(enabled = false, onClick = {})
     ) {
         Column(
             verticalArrangement = Arrangement.Top
         ) {
-            ContactHeaderView(onCancel, {
+            ContactHeaderView(isUpdate, onCancel, {
                 if (contact?.name.isNullOrEmpty()) {
                     Toast.makeText(
                         context,
@@ -84,7 +85,7 @@ fun ContactModifyView(
                 onAddPhoto = {
                     contactInputType.value = ContactInputType.Photo
                     selectedPhoto.value = it
-                    contactDetailViewModel.updateContact(
+                    contactDetailViewModel.modifyNewContact(
                         contact!!.clone(phoneUrl = it.toString()).apply {
                             this.setPhotoBitmap(BitmapUtils.uriToBitmap(context, it))
                         })
@@ -110,17 +111,17 @@ fun ContactModifyView(
             onConfirm = {
                 when (contactInputType.value) {
                     ContactInputType.Address -> {
-                        contactDetailViewModel.updateContact(contact = contact!!.clone(location = it))
+                        contactDetailViewModel.modifyNewContact(contact = contact!!.clone(location = it))
                     }
                     ContactInputType.Mail -> {
-                        contactDetailViewModel.updateContact(contact = contact!!.clone(email = it))
+                        contactDetailViewModel.modifyNewContact(contact = contact!!.clone(email = it))
                     }
                     ContactInputType.Name -> {
-                        contactDetailViewModel.updateContact(contact = contact!!.clone(name = it))
+                        contactDetailViewModel.modifyNewContact(contact = contact!!.clone(name = it))
                     }
                     ContactInputType.Phone -> {
                         try {
-                            contactDetailViewModel.updateContact(contact = contact!!.clone(number = it))
+                            contactDetailViewModel.modifyNewContact(contact = contact!!.clone(number = it))
                         } catch (e: NumberFormatException) {
                             Toast.makeText(
                                 context,
@@ -133,7 +134,7 @@ fun ContactModifyView(
                         }
                     }
                     ContactInputType.Photo -> {
-                        contactDetailViewModel.updateContact(contact!!.clone(phoneUrl = selectedPhoto.value.toString()))
+                        contactDetailViewModel.modifyNewContact(contact!!.clone(phoneUrl = selectedPhoto.value.toString()))
                     }
                 }
                 showInputDialog.value = false
@@ -148,19 +149,19 @@ private fun removeInfo(
 ) {
     when (contactInputType) {
         ContactInputType.Address -> {
-            contactDetailViewModel.updateContact(contact = contact.clone(location = null))
+            contactDetailViewModel.modifyNewContact(contact = contact.clone(location = null))
         }
         ContactInputType.Mail -> {
-            contactDetailViewModel.updateContact(contact = contact.clone(email = null))
+            contactDetailViewModel.modifyNewContact(contact = contact.clone(email = null))
         }
         ContactInputType.Name -> {
-            contactDetailViewModel.updateContact(contact = contact.clone(name = null))
+            contactDetailViewModel.modifyNewContact(contact = contact.clone(name = null))
         }
         ContactInputType.Phone -> {
-            contactDetailViewModel.updateContact(contact = contact.clone(number = ""))
+            contactDetailViewModel.modifyNewContact(contact = contact.clone(number = ""))
         }
         ContactInputType.Photo -> {
-            contactDetailViewModel.updateContact(contact = contact.clone(phoneUrl = null))
+            contactDetailViewModel.modifyNewContact(contact = contact.clone(phoneUrl = null))
         }
     }
 }
@@ -245,7 +246,7 @@ private fun TextInfoSection(contact: Contact, contactDetailViewModel: ContactDet
         EditView {
             StandardEditText(value = contact.name ?: "", hint = "Name", onChange = { text ->
                 val newContact = contact.clone(name = text)
-                contactDetailViewModel.updateContact(contact = newContact)
+                contactDetailViewModel.modifyNewContact(contact = newContact)
             })
         }
     }
@@ -375,7 +376,7 @@ private fun InfoAddView(isClickable: Boolean, addHint: String, onAdd: (() -> Uni
 }
 
 @Composable
-private fun ContactHeaderView(onDismiss: () -> Unit, onDone: () -> Unit) {
+private fun ContactHeaderView(isEdit: Boolean, onDismiss: () -> Unit, onDone: () -> Unit) {
     val showAlertDialog = remember {
         mutableStateOf(false)
     }
@@ -387,7 +388,7 @@ private fun ContactHeaderView(onDismiss: () -> Unit, onDone: () -> Unit) {
                 Text(text = "Confirmation")
             },
             text = {
-                Text("Are you sure you want to discard this new contact")
+                Text("Are you sure you want to discard this info")
             },
             confirmButton = {
                 Text(
@@ -429,7 +430,7 @@ private fun ContactHeaderView(onDismiss: () -> Unit, onDone: () -> Unit) {
                 style = TextStyle(color = iosBlue, fontSize = 16.sp),
                 modifier = Modifier.clickable { showAlertDialog.value = true })
             Text(
-                "New Contact",
+                if (isEdit) "Contact" else "New Contact",
                 style = TextStyle(color = iosBlack, fontSize = 17.sp, fontWeight = FontWeight.Bold),
                 modifier = Modifier
                     .weight(1f)

@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Context.TELECOM_SERVICE
 import android.os.Build
 import android.telecom.TelecomManager
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -16,7 +15,7 @@ import com.vau.studio.iosstyle.idialer_phone.data.NAV_SCREEN_KEY
 import com.vau.studio.iosstyle.idialer_phone.data.THEME_KEY
 import com.vau.studio.iosstyle.idialer_phone.data.local.SharePreferenceClient
 import com.vau.studio.iosstyle.idialer_phone.data.models.AppRoute
-import com.vau.studio.iosstyle.idialer_phone.views.composable.home_screen.HomeScreen
+import com.vau.studio.iosstyle.idialer_phone.views.composable.home_screen.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -50,7 +49,7 @@ class MainViewModel @Inject constructor(
     }
 
     fun navigateTo(route: String, args: Map<String, Any>? = null) {
-        if (HomeScreen.homeScreenRoutes.contains(route)) {
+        if (Screen.homeScreenRoutes.contains(route)) {
             sharePreClient.setString(NAV_SCREEN_KEY, route)
             _mainRoute.value = AppRoute(route = route, args = args)
         } else {

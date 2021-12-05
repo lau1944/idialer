@@ -5,7 +5,6 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.telecom.TelecomManager
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -25,7 +24,6 @@ import com.vau.studio.iosstyle.idialer_phone.core.DeviceInfo
 import com.vau.studio.iosstyle.idialer_phone.core.DeviceUtil
 import com.vau.studio.iosstyle.idialer_phone.data.CALL_LOG_READ_PERMISSION
 import com.vau.studio.iosstyle.idialer_phone.data.LIGHT_THEME
-import com.vau.studio.iosstyle.idialer_phone.data.REQUEST_CODE_FOR_DIALER
 import com.vau.studio.iosstyle.idialer_phone.views.composable.AppTheme
 import com.vau.studio.iosstyle.idialer_phone.views.composable.home_screen.HomeScreen
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.*

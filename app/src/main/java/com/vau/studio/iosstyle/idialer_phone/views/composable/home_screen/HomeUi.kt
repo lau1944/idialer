@@ -13,6 +13,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -106,28 +107,28 @@ fun ScreenContent(
         startDestination = startRoute.route,
         modifier = Modifier.padding(padding)
     ) {
-        composable(HomeScreen.FavoriteScreen.route) {
+        composable(Screen.FavoriteScreen.route) {
             FavoriteScreen(
                 favoriteViewModel = favoriteViewModel,
                 contactViewModel = contactViewModel,
                 mainViewModel = mainViewModel
             )
         }
-        composable(HomeScreen.RecentScreen.route) {
+        composable(Screen.RecentScreen.route) {
             RecentUi(
                 callViewModel = callViewModel,
                 mainViewModel = mainViewModel
             )
         }
-        composable(HomeScreen.ContactScreen.route) {
+        composable(Screen.ContactScreen.route) {
             ContactUi(
                 contactViewModel = contactViewModel,
                 contactDetailViewModel = contactDetailViewModel,
                 mainViewModel = mainViewModel
             )
         }
-        composable(HomeScreen.KeypadScreen.route) { DialerScreen() }
-        composable(HomeScreen.SettingScreen.route) { Text("Setting") }
+        composable(Screen.KeypadScreen.route) { DialerScreen() }
+        composable(Screen.SettingScreen.route) { Text("Setting") }
         composable(
             CONTACT_DETAIL_ROUTE + QUERY_PARAM_FIX, arguments = listOf(
                 navArgument("number")   { defaultValue = "" },
@@ -145,5 +146,7 @@ fun ScreenContent(
                 favoriteViewModel = favoriteViewModel
             )
         }
+
     }
+
 }

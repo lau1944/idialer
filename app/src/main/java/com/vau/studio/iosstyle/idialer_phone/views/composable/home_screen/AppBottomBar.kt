@@ -27,7 +27,7 @@ fun AppBottomBar(navController: NavController, onTap: (route: String) -> Unit) {
     ) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentDestination = navBackStackEntry?.destination
-        val items = HomeScreen.screensList()
+        val items = Screen.screensList()
         items.forEach { screen ->
             BottomNavigationItem(
                 icon = {
@@ -54,7 +54,7 @@ fun AppBottomBar(navController: NavController, onTap: (route: String) -> Unit) {
     }
 }
 
-enum class HomeScreen(
+enum class Screen(
     val route: String,
     @StringRes val resId: Int,
     @DrawableRes val drawableId: Int
@@ -70,7 +70,7 @@ enum class HomeScreen(
         val homeScreenRoutes = listOf<String>("favorite", "recent", "contact", "keypad", "setting")
 
         @JvmStatic
-        fun screensList(): List<HomeScreen> {
+        fun screensList(): List<Screen> {
             return listOf(
                 FavoriteScreen,
                 RecentScreen,
@@ -81,7 +81,7 @@ enum class HomeScreen(
         }
 
         @JvmStatic
-        fun decodedScreenByString(name: String) : HomeScreen {
+        fun decodedScreenByString(name: String) : Screen {
             when (name) {
                 "favorite" -> return FavoriteScreen
                 "recent" -> return RecentScreen

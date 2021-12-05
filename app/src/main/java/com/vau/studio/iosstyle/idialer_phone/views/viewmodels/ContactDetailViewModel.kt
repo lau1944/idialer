@@ -44,9 +44,11 @@ class ContactDetailViewModel @Inject constructor(
     private val _contactAddResultState = MutableLiveData<UiState<Contact>>(UiState.InIdle)
     val contactAddResultState: LiveData<UiState<Contact>> get() = _contactAddResultState
 
+    private val _contactUpdateState = MutableLiveData<UiState<Contact>>(UiState.InIdle)
+    val contactUpdateState: LiveData<UiState<Contact>> get() = _contactUpdateState
+
     private val _contactDeleteState = MutableLiveData<UiState<Any>>(UiState.InIdle)
     val contactDeleteState: LiveData<UiState<Any>> get() = _contactDeleteState
-
 
     init {
         initState()
@@ -87,8 +89,31 @@ class ContactDetailViewModel @Inject constructor(
         _contactAddResultState.value = state
     }
 
-    fun updateContact(contact: Contact) {
+    fun modifyNewContact(contact: Contact) {
         _newContact.value = contact
+    }
+
+    /**
+     * Update current contact info
+     */
+    fun updateContact(contact: Contact? = _newContact.value) = viewModelScope.launch {
+        if (_newContact.value != null) {
+            _contactUpdateState.value = UiState.InProgress
+            phoneRepository.updateContact(context, _newContact.value!!)
+                .catch {
+                    _contactUpdateState.value = UiState.Failed()
+                }
+                .collect {
+                    withContext(Dispatchers.Main) {
+                        if (it.isSuccessful) {
+                            _contactUpdateState.value = UiState.Success()
+                            _contactDetail.value = UiState.Success(_newContact.value)
+                        } else {
+                            _contactUpdateState.value = UiState.Failed()
+                        }
+                    }
+                }
+        }
     }
 
     fun getContactDetailById(id: Int) = viewModelScope.launch {
@@ -129,6 +154,10 @@ class ContactDetailViewModel @Inject constructor(
 
     fun initState() {
         _contactDetail.value = UiState.InProgress
+        _contactUpdateState.value = UiState.InIdle
+        _contactAddResultState.value = UiState.InIdle
+        _contactDeleteState.value = UiState.InIdle
+        _newContact.value = Contact()
     }
 
 }

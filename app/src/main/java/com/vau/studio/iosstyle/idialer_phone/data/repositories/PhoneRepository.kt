@@ -79,6 +79,42 @@ object PhoneRepository {
     }.flowOn(Dispatchers.IO)
 
     /**
+     * Update contact with new info
+     */
+    fun updateContact(context: Context, contact: Contact): Flow<Update.Result> = flow {
+        val queriedContact = findContacts(context)
+        val index = queriedContact.indexOfFirst {
+            it.id == contact.contactId?.toLong()
+        }
+
+        if (index == -1) throw IllegalStateException("This contact does not exist")
+
+        val result = Contacts(context)
+            .update()
+            .contacts(queriedContact[index].toMutableContact().apply {
+                setName {
+                    this.displayName = contact.name
+                }
+
+                addEmail {
+                    this.address = contact.email
+                }
+                addAddress {
+                    this.formattedAddress = contact.location
+                }
+
+                if (!contact.number.isNullOrEmpty()) {
+                    addPhone {
+                        this.number = contact.number
+                    }
+                }
+            })
+            .commit()
+        emit(result)
+
+    }.flowOn(Dispatchers.IO)
+
+    /**
      * Delete contact by id
      */
     fun deleteContactById(context: Context, contactId: String): Flow<UiState<*>> = flow {
@@ -122,21 +158,7 @@ object PhoneRepository {
         where: Where<AbstractDataField>?
     ): Flow<List<Contact>?> = flow {
 
-        val queriedContacts = Contacts(context)
-            .query()
-            .include(
-                Fields.Contact.DisplayNamePrimary,
-                Fields.Contact.DisplayNameAlt,
-                Fields.Email.Address,
-                Fields.Contact.HasPhoneNumber,
-                Fields.Phone.Number,
-                Fields.Contact.Id,
-                Fields.Contact.PhotoUri,
-                Fields.Contact.PhotoThumbnailUri
-            )
-            .where(where)
-            .find()
-
+        val queriedContacts = findContacts(context, where)
         val contacts = arrayListOf<Contact>()
         for (contact in queriedContacts) {
             if (!contact.displayNamePrimary.isNullOrEmpty()) {
@@ -161,76 +183,6 @@ object PhoneRepository {
             }
         }
         emit(contacts)
-        /* val cursor = context.contentResolver.query(
-             ContactsContract.Data.CONTENT_URI,
-             arrayOf(
-                 ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
-                 ContactsContract.CommonDataKinds.Email.DATA,
-                 ContactsContract.CommonDataKinds.Phone.NUMBER,
-                 ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
-                 ContactsContract.Contacts.PHOTO_THUMBNAIL_URI,
-                 ContactsContract.CommonDataKinds.StructuredPostal.DATA,
-                 ContactsContract.CommonDataKinds.Phone.HAS_PHONE_NUMBER
-             ),
-             lookUp,
-             null,
-             ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC"
-         )
-         if (cursor != null) {
-             val contacts = mutableListOf<Contact>()
-             val contactIdSet: HashSet<String> = hashSetOf()
-
-             try {
-                 while (cursor.moveToNext()) {
-                     val nameIndex =
-                         cursor.getColumnIndex(
-                             ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
-                         )
-                     val emailIndex =
-                         cursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA)
-                     val numberIndex =
-                         cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)
-                     val idIndex =
-                         cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_ID)
-                     val phoneUrlIndex =
-                         cursor.getColumnIndex(ContactsContract.Contacts.PHOTO_THUMBNAIL_URI)
-                     val postalIndex =
-                         cursor.getColumnIndex(ContactsContract.CommonDataKinds.Photo.PHOTO_THUMBNAIL_URI)
-                     val hasPhoneNumberIndex =
-                         cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.HAS_PHONE_NUMBER)
-                     val id = cursor.getString(idIndex)
-
-                     val rawContactPhotoUri = Uri.withAppendedPath(
-                         ContentUris.withAppendedId(RawContacts.CONTENT_URI, id.toLong()),
-                         RawContacts.DisplayPhoto.CONTENT_DIRECTORY
-                     )
-                     if (!contactIdSet.contains(id)) {
-                         contactIdSet.add(id)
-                         val hasPhoneNumber = cursor.getString(hasPhoneNumberIndex) != "0"
-                         contacts.add(
-                             Contact(
-                                 name = cursor.getString(nameIndex),
-                                 email = cursor.getString(emailIndex),
-                                 number = if (hasPhoneNumber) cursor.getString(numberIndex) else "",
-                                 contactId = id,
-                                 phoneUrl = rawContactPhotoUri.toString(),
-                                 postal = cursor.getString(postalIndex)
-                             )
-                         )
-                     }
-                 }
-                 emit(contacts)
-             } catch (e: Exception) {
-                 Log.i(TAG, e.toString())
-                 throw IllegalStateException(e)
-             } finally {
-                 cursor.close()
-             }
-         } else {
-             withContext(Dispatchers.Default) {
-                 emit(emptyList<Contact>())
-             }
-         }*/
     }.flowOn(Dispatchers.IO)
 
     /**
@@ -366,5 +318,25 @@ object PhoneRepository {
         } catch (e: Exception) {
             Log.i(TAG, e.toString())
         }
+    }
+
+    private fun findContacts(
+        context: Context,
+        where: Where<AbstractDataField>? = null
+    ): List<contacts.core.entities.Contact> {
+        return Contacts(context)
+            .query()
+            .include(
+                Fields.Contact.DisplayNamePrimary,
+                Fields.Contact.DisplayNameAlt,
+                Fields.Email.Address,
+                Fields.Contact.HasPhoneNumber,
+                Fields.Phone.Number,
+                Fields.Contact.Id,
+                Fields.Contact.PhotoUri,
+                Fields.Contact.PhotoThumbnailUri
+            )
+            .where(where)
+            .find()
     }
 }

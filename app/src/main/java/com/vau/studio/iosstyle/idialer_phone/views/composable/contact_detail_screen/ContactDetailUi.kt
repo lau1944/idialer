@@ -2,6 +2,7 @@ package com.vau.studio.iosstyle.idialer_phone.views.composable.contact_detail_sc
 
 import android.content.Context
 import android.os.Build
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
@@ -51,7 +53,6 @@ import java.util.*
 const val CONTACT_DETAIL_ROUTE = "contact_detail"
 const val QUERY_PARAM_FIX = "?number={number}&prevName={prevName}&id={id}"
 
-@RequiresApi(Build.VERSION_CODES.N)
 @ExperimentalComposeUiApi
 @Composable
 fun ContactDetailUi(
@@ -67,26 +68,39 @@ fun ContactDetailUi(
     val backgroundColor = remember {
         backgroundGray
     }
+    var contact by remember {
+        mutableStateOf<Contact>(Contact())
+    }
     val newContact by contactDetailViewModel.newContact.observeAsState()
     val contactCreateState by contactDetailViewModel.contactAddResultState.observeAsState()
+    val contactDetailState by contactDetailViewModel.contactDetail.observeAsState()
+    val contactUpdateState by contactDetailViewModel.contactUpdateState.observeAsState(initial = UiState.InIdle)
 
     val isFavorite = remember {
         mutableStateOf(favoriteViewModel.exist(id))
     }
+    var isEdit by remember {
+        mutableStateOf(false)
+    }
 
-    handleAddState(context, contactCreateState, contactDetailViewModel)
+    LaunchedEffect(true) {
+        handleAddState(context, contactCreateState, contactDetailViewModel)
+    }
 
     Scaffold(
         topBar = {
             DetailAppbar(prevName = preName!!, backgroundColor = backgroundColor, onEdit = {
-
+                if (contactDetailState is UiState.Success) {
+                    contactDetailViewModel.modifyNewContact(contact = contact)
+                    isEdit = true
+                }
             }, onBack = {
+                contactDetailViewModel.initState()
                 mainViewModel.popBack()
             })
         },
         backgroundColor = backgroundColor
     ) {
-        val contactDetailState by contactDetailViewModel.contactDetail.observeAsState()
         val isDefaultDialer by mainViewModel.isDefaultCaller.observeAsState(false)
         val showDialog = remember {
             mutableStateOf(false)
@@ -121,7 +135,7 @@ fun ContactDetailUi(
         }
 
         UiProgressLayout(state = contactDetailState) {
-            val contact: Contact = (contactDetailState as UiState.Success).data as Contact
+            contact = (contactDetailState as UiState.Success).data as Contact
 
             LazyColumn(content = {
                 item {
@@ -129,7 +143,7 @@ fun ContactDetailUi(
                     UserActionView(contact = contact)
 
                     if (!contact.number.isNullOrEmpty()) {
-                        PhoneInfoView(phoneNumber = contact.number) {
+                        PhoneInfoView(phoneNumber = contact.number!!) {
                             // on dial
                         }
                     }
@@ -162,7 +176,7 @@ fun ContactDetailUi(
 
                     if (contact.number != null) {
                         BlockContactView {
-                            contactViewModel.addBlockNumber(contact.number)
+                            contactViewModel.addBlockNumber(contact.number!!)
                         }
                     }
 
@@ -171,6 +185,38 @@ fun ContactDetailUi(
                 }
             })
         }
+    }
+
+    if (isEdit) {
+        ContactModifyView(
+            isUpdate = true,
+            contactDetailViewModel = contactDetailViewModel,
+            onCancel = { isEdit = false }) {
+            isEdit = false
+            contactDetailViewModel.updateContact()
+        }
+    }
+
+    ContactUpdateView(context, state = contactUpdateState)
+}
+
+@Composable
+private fun ContactUpdateView(context: Context, state: UiState<*>) {
+    when (state) {
+        is UiState.InProgress -> {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(iosGray.copy(0.3f)),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+        is UiState.Failed -> {
+            ToastUtil.make(context, " Contact updates failed, please try that again! ")
+        }
+        else -> Box {}
     }
 }
 

@@ -55,28 +55,28 @@ data class Contact(
      * Use this method to clone object instead of copy
      */
     fun clone(
-        contactId: Int? = null,
-        number: String? = null,
-        name: String? = null,
-        email: String? = null,
-        phoneUrl: String? = null,
-        postal: String? = null,
-        type: Int? = null,
-        callDate: String? = null,
-        duration: String? = null,
-        location: String? = null
+        contactId: Int? = this.contactId,
+        number: String? = this.number,
+        name: String? = this.name,
+        email: String? = this.email,
+        phoneUrl: String? = this.phoneUrl,
+        postal: String? = this.postal,
+        type: Int? = this.type,
+        callDate: String? = this.callDate,
+        duration: String? = this.duration,
+        location: String? = this.location
     ): Contact {
         val newContact = Contact(
-            contactId ?: this.contactId,
-            number ?: this.number,
-            name ?: this.name,
-            email ?: this.email,
-            phoneUrl ?: this.phoneUrl,
-            postal ?: this.postal,
-            type ?: this.type,
-            callDate ?: this.callDate,
-            duration ?: this.duration,
-            location ?: this.location
+            contactId,
+            number,
+            name,
+            email,
+            phoneUrl,
+            postal,
+            type,
+            callDate,
+            duration,
+            location
         )
         if (this.photoBitmap != null) {
             newContact.setPhotoBitmap(photoBitmap)
