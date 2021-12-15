@@ -7,6 +7,17 @@
     <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
     <uses-permission android:name="android.permission.READ_CALL_LOG" />
     <uses-permission android:name="android.permission.WRITE_CALL_LOG" />
+    <uses-permission android:name="android.permission.MANAGE_OWN_CALLS"/>
+
+    <!-- Needed only if your calling app reads numbers from the `PHONE_STATE`
+         intent action. The maxSdkVersion attribute is needed only if your
+         calling app uses the getLine1Number() or getMsisdn() methods. -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"
+        android:maxSdkVersion="29"/>
+
+    <!-- Needed only if your calling app uses the getLine1Number() or
+         getMsisdn() methods. -->
+    <uses-permission android:name="android.permissions.READ_PHONE_NUMBERS"/>
 
     <application
         android:name=".MainApplication"
@@ -37,6 +48,14 @@
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
+
+        <service android:name=".services.IDialerConnectionService"
+            android:permission="android.permission.BIND_TELECOM_CONNECTION_SERVICE"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.telecom.ConnectionService" />
+            </intent-filter>
+        </service>
 
         <service
             android:name=".services.DialerService"

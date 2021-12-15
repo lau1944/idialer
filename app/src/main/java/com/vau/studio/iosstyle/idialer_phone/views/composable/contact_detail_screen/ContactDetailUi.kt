@@ -30,10 +30,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.vau.studio.iosstyle.idialer_phone.R
-import com.vau.studio.iosstyle.idialer_phone.core.DateUtil
-import com.vau.studio.iosstyle.idialer_phone.core.ShareHandler
-import com.vau.studio.iosstyle.idialer_phone.core.TimeUtils
-import com.vau.studio.iosstyle.idialer_phone.core.ToastUtil
+import com.vau.studio.iosstyle.idialer_phone.core.*
 import com.vau.studio.iosstyle.idialer_phone.data.INCOMING_CALL_TYPE
 import com.vau.studio.iosstyle.idialer_phone.data.MISSED_CALL_TYPE
 import com.vau.studio.iosstyle.idialer_phone.data.OUTGOING_CALL_TYPE
@@ -141,11 +138,12 @@ fun ContactDetailUi(
             LazyColumn(content = {
                 item {
                     UserInfoView(contact = contact)
-                    UserActionView(contact = contact)
+                    UserActionView(context, contact = contact)
 
                     if (!contact.number.isNullOrEmpty()) {
                         PhoneInfoView(phoneNumber = contact.number!!) {
                             // on dial
+                            OpenUtil.openPhoneApp(context, contact.number)
                         }
                     }
 
@@ -162,6 +160,7 @@ fun ContactDetailUi(
                         isFavorite = isFavorite.value,
                         onSend = {
                             // send message
+                            OpenUtil.openSms(context, contact.number)
                         },
                         onShare = {
                             ShareHandler.shareText(context, contact.number.toString())
@@ -309,6 +308,9 @@ private fun PhoneInfoView(phoneNumber: String, onClicked: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
+            .clickable {
+                onClicked()
+            }
     ) {
         Column(modifier = Modifier.padding(5.dp)) {
             Text("mobile", style = TextStyle(fontSize = 12.sp))
@@ -354,22 +356,28 @@ private fun UserInfoView(contact: Contact) {
  * Action row view
  */
 @Composable
-private fun UserActionView(contact: Contact) {
+private fun UserActionView(context: Context, contact: Contact) {
     Row(
         horizontalArrangement = Arrangement.SpaceEvenly,
         modifier = Modifier.fillMaxWidth()
     ) {
 
         if (null != contact.name) {
-            ActionViewBox(res = R.drawable.ic_full_message, text = "Message")
+            ActionViewBox(res = R.drawable.ic_full_message, text = "Message", onTap = {
+                OpenUtil.openSms(context, contact.number)
+            })
         }
 
         if (null != contact.number) {
-            ActionViewBox(res = R.drawable.ic_phone, text = "Phone")
+            ActionViewBox(res = R.drawable.ic_phone, text = "Phone", onTap = {
+                OpenUtil.openPhoneApp(context, contact.number)
+            })
         }
 
         if (null != contact.email) {
-            ActionViewBox(res = R.drawable.ic_letter, text = "Mail")
+            ActionViewBox(res = R.drawable.ic_letter, text = "Mail", onTap = {
+                OpenUtil.openEmail(context, contact.email)
+            })
         }
     }
 }
