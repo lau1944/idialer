@@ -42,6 +42,7 @@ import java.lang.NumberFormatException
 @ExperimentalComposeUiApi
 @Composable
 fun ContactModifyView(
+    initNumber: String? = "",
     isUpdate: Boolean = false,
     contactDetailViewModel: ContactDetailViewModel,
     onCancel: () -> Unit,
@@ -50,6 +51,13 @@ fun ContactModifyView(
 ) {
     val context = LocalContext.current
     val contact by contactDetailViewModel.newContact.observeAsState()
+
+
+    LaunchedEffect(key1 = true, block = {
+        if (!initNumber.isNullOrEmpty()) {
+            contactDetailViewModel.modifyNewContact(contact!!.clone(number = initNumber))
+        }
+    })
 
     val showInputDialog = remember {
         mutableStateOf(false)

@@ -10,6 +10,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.vau.studio.iosstyle.idialer_phone.data.models.KeypadNumber
 import com.vau.studio.iosstyle.idialer_phone.R
+import com.vau.studio.iosstyle.idialer_phone.core.OpenUtil
 import com.vau.studio.iosstyle.idialer_phone.views.composable.components.CallButton
 import com.vau.studio.iosstyle.idialer_phone.views.composable.components.NumberCircleButton
 
@@ -17,7 +18,8 @@ import com.vau.studio.iosstyle.idialer_phone.views.composable.components.NumberC
 fun KeypadLayout(
     collection: List<List<KeypadNumber>>,
     hasNumber: Boolean? = false,
-    onClear: () -> Unit,
+    onCall: () -> Unit,
+    onRemoved: () -> Unit,
     onTap: (String) -> Unit
 ) {
     val padding = 10.dp
@@ -47,7 +49,7 @@ fun KeypadLayout(
         ) {
             Box(modifier = Modifier.weight(1f))
             CallButton {
-
+                onCall()
             }
             Box(
                 modifier = Modifier
@@ -62,7 +64,7 @@ fun KeypadLayout(
                         modifier = Modifier
                             .size(35.dp)
                             .clickable(
-                                onClick = onClear
+                                onClick = onRemoved
                             )
                     )
                 }

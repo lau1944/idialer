@@ -42,11 +42,7 @@ object OpenUtil {
                 intent.data = Uri.parse("tel:$phoneNumber")
                 context.startActivity(intent)
             } else {
-                Toast.makeText(
-                    context,
-                    "Phone number format error",
-                    Toast.LENGTH_SHORT
-                ).show()
+                ToastUtil.make(context, "Phone number format error")
             }
         } catch (e: Exception) {
             Log.i(TAG, e.toString())

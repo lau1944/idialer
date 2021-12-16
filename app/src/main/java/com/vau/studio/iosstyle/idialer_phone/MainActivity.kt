@@ -22,8 +22,10 @@ import androidx.core.content.ContextCompat
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.vau.studio.iosstyle.idialer_phone.core.DeviceInfo
 import com.vau.studio.iosstyle.idialer_phone.core.DeviceUtil
+import com.vau.studio.iosstyle.idialer_phone.core.PickDefaultActivityContract
 import com.vau.studio.iosstyle.idialer_phone.data.CALL_LOG_READ_PERMISSION
 import com.vau.studio.iosstyle.idialer_phone.data.LIGHT_THEME
+import com.vau.studio.iosstyle.idialer_phone.data.REQUEST_CODE_FOR_DIALER
 import com.vau.studio.iosstyle.idialer_phone.views.composable.AppTheme
 import com.vau.studio.iosstyle.idialer_phone.views.composable.home_screen.HomeScreen
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.*
@@ -37,8 +39,6 @@ class MainActivity : ComponentActivity() {
     private val favoriteViewModel: FavoriteViewModel by viewModels()
     private val contactDetailViewModel: ContactDetailViewModel by viewModels()
 
-    private lateinit var resultLauncher: ActivityResultLauncher<Intent>
-
     @RequiresApi(Build.VERSION_CODES.M)
     @ExperimentalComposeUiApi
     @ExperimentalFoundationApi
@@ -48,7 +48,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         registerResultLauncher()
-        observeDefaultDialer()
+        //observeDefaultDialer()
 
         setContent {
             val theme: Int by mainViewModel.appTheme.observeAsState(initial = LIGHT_THEME)
@@ -87,34 +87,13 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun registerResultLauncher() {
-        resultLauncher =
-            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-                handleDefaultDialerResult(result.resultCode)
+        val launcher = registerForActivityResult(PickDefaultActivityContract()) { result ->
+            handleDefaultDialerResult(result)
         }
+        launcher.launch(REQUEST_CODE_FOR_DIALER)
     }
 
-    private fun observeDefaultDialer() {
-        mainViewModel.isDefaultCaller.observe(this, { isDialer ->
-            if (!isDialer && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                val intent =
-                    Intent(TelecomManager.ACTION_CHANGE_DEFAULT_DIALER)
-                        .putExtra(
-                            TelecomManager.EXTRA_CHANGE_DEFAULT_DIALER_PACKAGE_NAME,
-                            packageName
-                        )
-                resultLauncher.launch(intent)
-                /*val intent =
-                    Intent(TelecomManager.ACTION_CHANGE_DEFAULT_DIALER)
-                        .putExtra(
-                            TelecomManager.EXTRA_CHANGE_DEFAULT_DIALER_PACKAGE_NAME,
-                            packageName
-                        )
-                startActivityForResult(intent, REQUEST_CODE_FOR_DIALER)*/
-            }
-        })
-    }
-
-    private fun handleDefaultDialerResult(resultCode: Int) {
+    private fun handleDefaultDialerResult(resultCode: Int?) {
         when (resultCode) {
             RESULT_OK -> {
                 mainViewModel.checkIfDefaultCaller()
@@ -126,11 +105,11 @@ class MainActivity : ComponentActivity() {
                 ).show()
             }
             RESULT_CANCELED -> {
-                Toast.makeText(
+                /*Toast.makeText(
                     this,
                     "iDialer is not currently your default dialer app, some functionalities would not perform properly",
                     Toast.LENGTH_SHORT
-                ).show()
+                ).show()*/
             }
             else -> {
                 Toast.makeText(

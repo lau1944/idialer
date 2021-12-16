@@ -34,19 +34,22 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
 
-            <!-- dialer intent -->
+        <activity android:name=".views.CallActivity"
+            android:exported="true">
+            <!--
             <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
                 <action android:name="android.intent.action.DIAL"/>
                 <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.DIAL"/>
+                <category android:name="android.intent.category.DEFAULT"/>
                 <data android:scheme="tel"/>
             </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.DIAL"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-            </intent-filter>
+            -->
         </activity>
 
         <service android:name=".services.IDialerConnectionService"

@@ -127,13 +127,14 @@ fun ScreenContent(
                 mainViewModel = mainViewModel
             )
         }
-        composable(Screen.KeypadScreen.route) { DialerScreen() }
+        composable(Screen.KeypadScreen.route) { DialerScreen(contactDetailViewModel = contactDetailViewModel) }
         composable(Screen.SettingScreen.route) { Text("Setting") }
         composable(
-            CONTACT_DETAIL_ROUTE + QUERY_PARAM_FIX, arguments = listOf(
-                navArgument("number")   { defaultValue = "" },
+            CONTACT_DETAIL_ROUTE + QUERY_PARAM_FIX,
+            arguments = listOf(
+                navArgument("number") { defaultValue = "" },
                 navArgument("prevName") { defaultValue = "" },
-                navArgument("id")       { defaultValue = 0 }
+                navArgument("id") { defaultValue = 0 }
             ),
         ) { entry ->
             ContactDetailUi(

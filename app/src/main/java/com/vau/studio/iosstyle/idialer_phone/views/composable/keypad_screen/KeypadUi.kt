@@ -1,46 +1,76 @@
 package com.vau.studio.iosstyle.idialer_phone.views.composable.keypad_screen
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.vau.studio.iosstyle.idialer_phone.core.OpenUtil
 import com.vau.studio.iosstyle.idialer_phone.data.models.KeypadNumber
+import com.vau.studio.iosstyle.idialer_phone.views.composable.components.ContactModifyView
 import com.vau.studio.iosstyle.idialer_phone.views.composable.iosBlue
+import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.ContactDetailViewModel
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.DialerViewModel
 
+@ExperimentalComposeUiApi
 @Composable
-fun DialerScreen(dialerViewModel: DialerViewModel = viewModel()) {
+fun DialerScreen(
+    dialerViewModel: DialerViewModel = viewModel(),
+    contactDetailViewModel: ContactDetailViewModel
+) {
     val numberList = dialerViewModel.inputNumber.observeAsState()
+    val context = LocalContext.current
     val collection = remember { getKeypadCollections() }
+
+    var showAddNumberDialer by remember {
+        mutableStateOf(false)
+    }
 
     Column(
         modifier = Modifier.padding(bottom = 20.dp, top = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
-        DialerNumberScreen(numberList.value)
+        DialerNumberScreen(numberList.value, onAddNumber = {
+            showAddNumberDialer = true
+        })
         KeypadLayout(
             collection = collection,
             hasNumber = !numberList.value.isNullOrEmpty(),
+            onCall = {
+                OpenUtil.openPhoneApp(context, dialerViewModel.numberListToString())
+            },
             onTap = { number ->
                 dialerViewModel.appendNumber(number = number)
             },
-            onClear = {
-                dialerViewModel.clearAllNumber()
+            onRemoved = {
+                dialerViewModel.removeNumber()
             })
     }
+
+    if (showAddNumberDialer) {
+        ContactModifyView(
+            initNumber = dialerViewModel.numberListToString(),
+            contactDetailViewModel = contactDetailViewModel,
+            onCancel = { showAddNumberDialer = false }) {
+            showAddNumberDialer = false
+        }
+    }
+
 }
 
 @Composable
-fun DialerNumberScreen(number: List<String>?) {
+fun DialerNumberScreen(number: List<String>?, onAddNumber: () -> Unit) {
     val buffer = StringBuffer()
     if (!number.isNullOrEmpty()) {
         for (num in number) {
@@ -66,7 +96,10 @@ fun DialerNumberScreen(number: List<String>?) {
             overflow = TextOverflow.Ellipsis
         )
         if (currentNumber.isNotEmpty()) {
-            Text("Add number", style = TextStyle(color = iosBlue, fontSize = 16.sp))
+            Text(
+                "Add number",
+                style = TextStyle(color = iosBlue, fontSize = 16.sp),
+                modifier = Modifier.clickable { onAddNumber() })
         }
     }
 }
