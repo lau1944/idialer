@@ -205,8 +205,9 @@ object PhoneRepository {
                 CallLog.Calls.CONTENT_URI,
                 projection, selection, null, CallLog.Calls.DATE + " DESC"
             )
-        if (cursor != null) {
-            try {
+
+        try {
+            if (cursor != null) {
                 val callLogs = mutableListOf<Contact>()
                 val number = cursor.getColumnIndex(CallLog.Calls.NUMBER)
                 val name = cursor.getColumnIndex(CallLog.Calls.CACHED_NAME)
@@ -230,15 +231,15 @@ object PhoneRepository {
                     callLogs.add(contact)
                 }
                 emit(callLogs)
-            } catch (e: Exception) {
-                Log.i(TAG, e.toString())
-                throw IllegalStateException(e)
-            } finally {
-                cursor.close()
             }
-        } else {
+        } catch (e: Exception) {
+            Log.i(TAG, e.toString())
             emit(emptyList<Contact>())
+            throw IllegalStateException(e)
+        } finally {
+            cursor?.close()
         }
+
     }.flowOn(Dispatchers.IO)
 
     /**

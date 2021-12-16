@@ -26,6 +26,7 @@ import com.vau.studio.iosstyle.idialer_phone.views.composable.contact_screen.Con
 import com.vau.studio.iosstyle.idialer_phone.views.composable.favorite_screen.FavoriteScreen
 import com.vau.studio.iosstyle.idialer_phone.views.composable.keypad_screen.DialerScreen
 import com.vau.studio.iosstyle.idialer_phone.views.composable.recent_screen.RecentUi
+import com.vau.studio.iosstyle.idialer_phone.views.composable.setting_screen.SettingView
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.*
 
 @ExperimentalComposeUiApi
@@ -128,7 +129,7 @@ fun ScreenContent(
             )
         }
         composable(Screen.KeypadScreen.route) { DialerScreen(contactDetailViewModel = contactDetailViewModel) }
-        composable(Screen.SettingScreen.route) { Text("Setting") }
+        composable(Screen.SettingScreen.route) { SettingView() }
         composable(
             CONTACT_DETAIL_ROUTE + QUERY_PARAM_FIX,
             arguments = listOf(

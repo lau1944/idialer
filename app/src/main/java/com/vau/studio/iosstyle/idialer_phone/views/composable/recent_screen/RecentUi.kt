@@ -156,7 +156,6 @@ private fun CallList(
     onEdit: Boolean,
     onTap: ((String) -> Unit)? = null
 ) {
-    println(onEdit)
     val onEditItemIndex by callViewModel.cancelStateIndex.observeAsState()
 
     if (histories.isEmpty()) {

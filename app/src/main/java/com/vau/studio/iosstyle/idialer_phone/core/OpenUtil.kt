@@ -10,7 +10,19 @@ import java.lang.Exception
 import java.util.*
 
 object OpenUtil {
-    const val TAG: String = "OPEN_INTENT"
+    private const val TAG: String = "OPEN_INTENT"
+
+    fun openMyApp(context: Context, packageName: String) {
+        try {
+            val intent = Intent(Intent.ACTION_VIEW)
+                .apply {
+                    data = Uri.parse("market://details?id=$packageName")
+                }
+            context.startActivity(intent)
+        } catch (e: Exception) {
+            Log.i(TAG, e.toString())
+        }
+    }
 
     fun openSetting(context: Context) {
         try {

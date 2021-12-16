@@ -37,10 +37,7 @@ import com.vau.studio.iosstyle.idialer_phone.data.OUTGOING_CALL_TYPE
 import com.vau.studio.iosstyle.idialer_phone.data.models.Contact
 import com.vau.studio.iosstyle.idialer_phone.data.models.UiState
 import com.vau.studio.iosstyle.idialer_phone.views.composable.*
-import com.vau.studio.iosstyle.idialer_phone.views.composable.components.AssetImage
-import com.vau.studio.iosstyle.idialer_phone.views.composable.components.ContactModifyView
-import com.vau.studio.iosstyle.idialer_phone.views.composable.components.GlideImage
-import com.vau.studio.iosstyle.idialer_phone.views.composable.components.UiProgressLayout
+import com.vau.studio.iosstyle.idialer_phone.views.composable.components.*
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.ContactDetailViewModel
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.ContactViewModel
 import com.vau.studio.iosstyle.idialer_phone.views.viewmodels.FavoriteViewModel
@@ -174,14 +171,14 @@ fun ContactDetailUi(
                             ToastUtil.make(context, "Contact has added to your favorites")
                         })
 
-                    if (contact.number != null) {
+                    /*if (contact.number != null) {
                         BlockContactView {
                             contactViewModel.addBlockNumber(contact.number!!)
                         }
-                    }
+                    }*/
 
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isDefaultDialer)
-                        BlockContactView(number = contact.number.toString(), contactViewModel)
+                   /* if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isDefaultDialer)
+                        BlockContactView(number = contact.number.toString(), contactViewModel)*/
                 }
             })
         }
@@ -665,18 +662,5 @@ private fun ActionViewBox(onTap: (() -> Unit)? = null, res: Int, text: String) {
                 Text(text, style = TextStyle(color = iosBlue, fontSize = 12.sp))
             }
         }
-    }
-}
-
-@Composable
-private fun InfoViewHolder(modifier: Modifier? = Modifier, content: @Composable () -> Unit) {
-    Box(
-        modifier = modifier!!
-            .clip(RoundedCornerShape(16.dp))
-            .shadow(5.dp)
-            .background(appColor().background)
-            .padding(horizontal = 10.dp)
-    ) {
-        content()
     }
 }
